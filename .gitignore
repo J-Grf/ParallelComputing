@@ -3,4 +3,5 @@
 *build*
 *tar.gz
 *.gz
-*/.vscode
+*/.vscode/*
+*.core.*
