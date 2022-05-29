@@ -1,0 +1,31 @@
+#Title of the simulation
+title disk-finest
+
+# Name of the mesh information file
+minf ../test/mesh-disk-finest/minf.space
+
+# Name of the coordinates file
+mxyz ../test/mesh-disk-finest/mxyz.space
+
+# Name of the connectivity file
+mien ../test/mesh-disk-finest/mien
+
+# Diffusion coefficient
+# D 1.48936170213e-05
+D 1
+
+# Source term (heat generation)
+S 31830
+
+# Number of face groups
+nfg 1
+
+# Boundary type and value for face groups
+# Type 1 = Dirichlet
+fg 1 1 300
+
+# Number of iterations
+iter 320001
+
+# Time step
+dt 0.0000001

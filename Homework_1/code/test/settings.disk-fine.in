@@ -1,0 +1,18 @@
+#Title of the simulation
+title disk-fine
+
+# Name of the mesh information file
+minf ./mesh-disk-fine/minf
+
+# Name of the coordinates file
+mxyz ./mesh-disk-fine/mxyz
+
+# Name of the connectivity file
+mien ./mesh-disk-fine/mien
+
+# number of partitions or pes
+npes 2
+
+# partitioning type
+type node
+#angle

@@ -1,0 +1,18 @@
+#Title of the simulation
+title disk-coarse
+
+# Name of the mesh information file
+minf ./mesh-disk-coarse/minf
+
+# Name of the coordinates file
+mxyz ./mesh-disk-coarse/mxyz
+
+# Name of the connectivity file
+mien ./mesh-disk-coarse/mien
+
+# number of partitions or pes
+npes 2
+
+# partitioning type
+type node
+#angle

@@ -1,0 +1,6 @@
+*.vtu
+*.pvtu
+*build*
+*tar.gz
+*.gz
+*/.vscode

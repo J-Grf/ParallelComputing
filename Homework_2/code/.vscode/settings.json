@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.F": "fortran-modern",
+        "iostream": "cpp",
+        "iomanip": "cpp"
+    },
+    "git.ignoreLimitWarning": true
+}
