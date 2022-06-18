@@ -7,3 +7,4 @@
 *.core.*
 *.log
 2d_Unsteady_OpenMP
+core.*

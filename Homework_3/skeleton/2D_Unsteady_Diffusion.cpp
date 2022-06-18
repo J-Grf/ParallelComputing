@@ -25,6 +25,10 @@ int main(int argc, char **argv) {
 
     double starttime = omp_get_wtime();
 
+    /*int numT = omp_get_num_threads();
+    cout << "number of threads " << numT << endl;
+    */
+    
     inputSettings*  settings    = new inputSettings(argc, argv);
     triMesh*        mesh        = new triMesh;
     femSolver*      solver      = new femSolver;

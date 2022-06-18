@@ -24,7 +24,7 @@ nfg 1
 fg 1 1 300
 
 # Number of iterations
-iter 3 # 12001
+iter 12001
 
 # Time step
 dt 0.000002

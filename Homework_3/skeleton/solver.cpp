@@ -303,20 +303,25 @@ void femSolver::explicitSolver()
     for (int iter=0; iter<nIter; iter++)
     {
         // clear RHS MTnew
+        #pragma omp parallel for
         for(int i=0; i<nn; i++){
             MTnew[i] = 0;
         }
 
         // Evaluate right hand side at element level
+        //First most time cosuming loop
         double s1, e1;
         s1 = omp_get_wtime();
+        int i;
+        #pragma omp parallel for private(elem, M, F, K, TL, MTnewL, i) reduction (+:MTnew[0:nn])
         for(int e=0; e<ne; e++)
         {
             elem = mesh->getElem(e);
             M = elem->getMptr();
             F = elem->getFptr();
             K = elem->getKptr();
-            for(int i=0; i<nen; i++)
+
+            for(i=0; i<nen; i++)
             {
                 TL[i] = T[elem->getConn(i)];
             }
@@ -331,13 +336,19 @@ void femSolver::explicitSolver()
             MTnew[elem->getConn(2)] += MTnewL[2];
         }
         e1 = omp_get_wtime();
-        cout << "calculate right hand side for each element: " << e1-s1 << endl;
+        if (iter == 5)
+            cout << "calculate right hand side for each element: " << e1-s1 << endl;
 
         // Evaluate the new temperature on each node on partition level
         partialL2error = 0.0;
         globalL2error = 0.0;
+
+        //second most time consuming loop
         double s2, e2;
         s2 = omp_get_wtime();
+        // T and MTnew are arrays that have nn entries, and every entry is just accessed once 
+        // and can be therefore made private!
+        #pragma omp parallel for private(pNode, massTmp, MT, Tnew) reduction (+:partialL2error)
         for(int i=0; i<nn; i++)
         {
             pNode = mesh->getNode(i);
@@ -357,7 +368,8 @@ void femSolver::explicitSolver()
             }
         }
         e2 = omp_get_wtime();
-        cout << "evaluate new temperature " << e2 - s2 << endl;
+        if (iter == 5)
+            cout << "evaluate new temperature " << e2 - s2 << endl;
         globalL2error = sqrt(partialL2error/this->nnSolved);
 
         if(iter==0)
