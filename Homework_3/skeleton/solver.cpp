@@ -308,6 +308,8 @@ void femSolver::explicitSolver()
         }
 
         // Evaluate right hand side at element level
+        double s1, e1;
+        s1 = omp_get_wtime();
         for(int e=0; e<ne; e++)
         {
             elem = mesh->getElem(e);
@@ -328,10 +330,14 @@ void femSolver::explicitSolver()
             MTnew[elem->getConn(1)] += MTnewL[1];
             MTnew[elem->getConn(2)] += MTnewL[2];
         }
+        e1 = omp_get_wtime();
+        cout << "calculate right hand side for each element: " << e1-s1 << endl;
 
         // Evaluate the new temperature on each node on partition level
         partialL2error = 0.0;
         globalL2error = 0.0;
+        double s2, e2;
+        s2 = omp_get_wtime();
         for(int i=0; i<nn; i++)
         {
             pNode = mesh->getNode(i);
@@ -350,6 +356,8 @@ void femSolver::explicitSolver()
                 MTnew[i] = 0;
             }
         }
+        e2 = omp_get_wtime();
+        cout << "evaluate new temperature " << e2 - s2 << endl;
         globalL2error = sqrt(partialL2error/this->nnSolved);
 
         if(iter==0)

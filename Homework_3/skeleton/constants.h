@@ -10,6 +10,7 @@
 #include <cstring>
 #include <limits>
 #include <time.h>
+#include <omp.h>
 
 using namespace std;
 

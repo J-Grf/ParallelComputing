@@ -5,3 +5,5 @@
 *.gz
 */.vscode/*
 *.core.*
+*.log
+2d_Unsteady_OpenMP

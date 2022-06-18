@@ -10,7 +10,8 @@
 #include "tri.h"
 #include "solver.h"
 #include "postProcessor.h"
-#include <ctime>
+//#include <ctime>
+#include <omp.h>
 
 int main(int argc, char **argv) {
 /******************************************************************************* ********************
@@ -22,7 +23,7 @@ int main(int argc, char **argv) {
  * 3. Post-Processing Stage
  ***************************************************************************************************/
 
-    clock_t starttime = clock();
+    double starttime = omp_get_wtime();
 
     inputSettings*  settings    = new inputSettings(argc, argv);
     triMesh*        mesh        = new triMesh;
@@ -39,8 +40,8 @@ int main(int argc, char **argv) {
     // Post-Processing Stage
     postP->postProcessorControl(settings, mesh);
 
-    clock_t endtime = clock();
-    cout << "Elapsed time is " << fixed << double(endtime - starttime) / CLOCKS_PER_SEC << endl;
+    double endtime = omp_get_wtime();
+    cout << "Elapsed time is " << fixed << endtime - starttime << endl;
 
     // Cleanup
     delete settings;

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT(2d_Unsteady_OpenMP)
 
-add_compile_options(-g -no-multibyte-chars) # ADD YOUR CODE HERE
+add_compile_options(-g -no-multibyte-chars) #-fp-model fast=2 -unroll -qopt-prefetch -xhost -ipo -qopt-prefetch -no-multibyte-chars) # ADD YOUR CODE HERE
 
 find_package(OpenMP)
 if (OPENMP_FOUND)
