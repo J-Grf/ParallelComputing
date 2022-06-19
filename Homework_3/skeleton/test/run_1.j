@@ -32,4 +32,4 @@
 
 # run the process
 export OMP_SCHEDULE="static,128"
-../build/2d_Unsteady_OpenMP ./settings.coarse.in
+../build/2d_Unsteady_OpenMP ./settings.fine.in
