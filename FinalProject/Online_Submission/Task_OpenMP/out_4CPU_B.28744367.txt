@@ -1,0 +1,40 @@
+
+==================== SETTINGS ====================
+Title of the simualation              : coarse-mesh
+Name of the minf file                 : ./coarse-mesh/minf.space
+Name of the mxyz file                 : ./coarse-mesh/mxyz.space
+Name of the mien file                 : ./coarse-mesh/mien
+Name of the mrng file                 : mrng
+Name of the initial distribution file : data
+Initial value of the Temperature      : 0.0000e+00
+Diffusion coefficient                 : 1.0000e+00
+Source term                           : 3.1831e+05
+Number of maximum time steps          : 30000
+Time step size                        : 1.0000e-06
+                                         BCType	BCValue1	BCValue2
+BC Type and values of face group 1      : 1	5.0000e+02	0.0000e+00
+
+====================== MESH ======================
+> Number of mesh elements : 3952
+> Number of nodes : 2041
+> File read complete: minf
+> Mesh data structure is created.
+> File read complete: ./coarse-mesh/mxyz.space
+> File read complete: ./coarse-mesh/mien
+
+=================== SOLUTION =====================
+The initial error is: 1.1501e+01
+Iter	Time	L2 Error	
+0	0.00000	1.00000e+00
+1000	0.00100	1.25191e-02
+2000	0.00200	7.03547e-03
+2353	0.00235	0.00000e+00
+Out of the TIME loop ...
+Total Solver Time = 1.22452e-01
+
+================ POST-PROCESSING =================
+Tmin 3.26625e+02
+Tmax 5.00000e+02
+RMS error 1.18099e+02
+coarse-mesh.vtu
+Elapsed time is 0.18725
