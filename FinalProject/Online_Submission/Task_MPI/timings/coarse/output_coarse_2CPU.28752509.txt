@@ -1,0 +1,63 @@
+A Parallel 2-Dimensional Unsteady Diffusion Equation Solver
+
+==================== SETTINGS ====================
+Title of the simualation              : coarse-mesh
+Name of the minf file                 : ./coarse-mesh/minf.space
+Name of the mxyz file                 : ./coarse-mesh/mxyz.space
+Name of the mien file                 : ./coarse-mesh/mien
+Name of the mrng file                 : mrng
+Name of the initial distribution file : data
+Initial value of the Temperature      : 0.0000e+00
+Diffusion coefficient                 : 1.0000e+00
+Source term                           : 3.1831e+05
+Number of maximum time steps          : 30000
+Time step size                        : 1.0000e-06
+                                         BCType	BCValue1	BCValue2
+BC Type and values of face group 1      : 1	5.0000e+02	0.0000e+00
+
+====================== MESH ======================
+> Number of mesh elements : 3952
+> Number of nodes : 2041
+> File read complete: minf
+mype:1 nnc:1020 mnc:1021 nec:1976
+mype:0 nnc:1021 mnc:1021 nec:1976
+> Mesh data structure is created.
+> File read complete: ./coarse-mesh/mxyz.space
+> File read complete: ./coarse-mesh/mien
+
+=================== SOLUTION =====================
+The initial error is: 1.187940448642408e+01
+Iter	Time	L2 Error	
+mype 0 0	0.00000	1.000000000000000e+00
+mype 0 1000	0.00100	1.243752839155612e-02
+mype 0 2000	0.00200	6.988423093313463e-03
+mype 0 3000	0.00300	3.926198461590365e-03
+mype 0 4000	0.00400	2.202805281603113e-03
+mype 0 5000	0.00500	1.235735977495207e-03
+mype 0 6000	0.00600	6.932192659581931e-04
+mype 0 7000	0.00700	3.888796000755402e-04
+mype 0 8000	0.00800	2.181522341520901e-04
+mype 0 9000	0.00900	1.223782295142537e-04
+mype 0 10000	0.01000	6.865128431478664e-05
+mype 0 11000	0.01100	3.851174229716464e-05
+mype 0 12000	0.01200	2.160417404513502e-05
+mype 0 13000	0.01300	1.211942925274373e-05
+mype 0 14000	0.01400	6.798712374127451e-06
+mype 0 15000	0.01500	3.813916396585088e-06
+mype 0 16000	0.01600	2.139516643815545e-06
+mype 0 17000	0.01700	1.200218094282035e-06
+mype 0 18000	0.01800	6.732938850534680e-07
+mype 0 19000	0.01900	3.777019010490231e-07
+mype 0 20000	0.02000	2.118818084737777e-07
+mype 0 21000	0.02100	1.188606693313164e-07
+21299	0.02130	9.999368582235694e-08
+sumT 1.033240049884123e+06
+
+================ POST-PROCESSING =================
+Tmin 5.000000000000000e+02
+Tmax 5.342581408318098e+02
+RMS error 3.412241864718904e+00
+coarse-mesh_1.vtu
+coarse-mesh_0.vtu
+Elapsed time is 1.498116970062256
+: Ciao:)

@@ -1,0 +1,83 @@
+A Parallel 2-Dimensional Unsteady Diffusion Equation Solver
+
+==================== SETTINGS ====================
+Title of the simualation              : coarse-mesh
+Name of the minf file                 : ./coarse-mesh/minf.space
+Name of the mxyz file                 : ./coarse-mesh/mxyz.space
+Name of the mien file                 : ./coarse-mesh/mien
+Name of the mrng file                 : mrng
+Name of the initial distribution file : data
+Initial value of the Temperature      : 0.0000e+00
+Diffusion coefficient                 : 1.0000e+00
+Source term                           : 3.1831e+05
+Number of maximum time steps          : 30000
+Time step size                        : 1.0000e-06
+                                         BCType	BCValue1	BCValue2
+BC Type and values of face group 1      : 1	5.0000e+02	0.0000e+00
+
+====================== MESH ======================
+mype:1 nnc:171 mnc:171 nec:330
+mype:8 nnc:171 mnc:171 nec:330
+mype:2 nnc:171 mnc:171 nec:330
+mype:3 nnc:171 mnc:171 nec:330
+mype:6 nnc:171 mnc:171 nec:330
+mype:7 nnc:171 mnc:171 nec:330
+mype:10 nnc:171 mnc:171 nec:330
+mype:11 nnc:160 mnc:171 nec:322
+> Number of mesh elements : 3952
+> Number of nodes : 2041
+> File read complete: minf
+mype:0 nnc:171 mnc:171 nec:330
+> Mesh data structure is created.
+mype:4 nnc:171 mnc:171 nec:330
+mype:5 nnc:171 mnc:171 nec:330
+mype:9 nnc:171 mnc:171 nec:330
+> File read complete: ./coarse-mesh/mxyz.space
+> File read complete: ./coarse-mesh/mien
+
+=================== SOLUTION =====================
+The initial error is: 1.187940448642408e+01
+Iter	Time	L2 Error	
+mype 0 0	0.00000	1.000000000000000e+00
+mype 0 1000	0.00100	1.243764745573451e-02
+mype 0 2000	0.00200	6.988485887469179e-03
+mype 0 3000	0.00300	3.926247499779368e-03
+mype 0 4000	0.00400	2.202832666131372e-03
+mype 0 5000	0.00500	1.235756438590447e-03
+mype 0 6000	0.00600	6.932309668647482e-04
+mype 0 7000	0.00700	3.888864534055252e-04
+mype 0 8000	0.00800	2.181560798411740e-04
+mype 0 9000	0.00900	1.223803869011631e-04
+mype 0 10000	0.01000	6.865253125617544e-05
+mype 0 11000	0.01100	3.851248012281530e-05
+mype 0 12000	0.01200	2.160482263992584e-05
+mype 0 13000	0.01300	1.211978563396836e-05
+mype 0 14000	0.01400	6.798911956033130e-06
+mype 0 15000	0.01500	3.814043130017970e-06
+mype 0 16000	0.01600	2.139594583599141e-06
+mype 0 17000	0.01700	1.200265964290740e-06
+mype 0 18000	0.01800	6.733207503656348e-07
+mype 0 19000	0.01900	3.777172527564706e-07
+mype 0 20000	0.02000	2.118904219424799e-07
+mype 0 21000	0.02100	1.188655014378595e-07
+21299	0.02130	9.999775102612226e-08
+sumT 1.033240049747048e+06
+
+================ POST-PROCESSING =================
+Tmin 5.000000000000000e+02
+Tmax 5.342581406830241e+02
+RMS error 3.412241944305249e+00
+coarse-mesh_0.vtu
+coarse-mesh_5.vtu
+coarse-mesh_1.vtu
+coarse-mesh_3.vtu
+coarse-mesh_6.vtu
+coarse-mesh_7.vtu
+coarse-mesh_8.vtu
+coarse-mesh_9.vtu
+coarse-mesh_10.vtu
+coarse-mesh_2.vtu
+coarse-mesh_4.vtu
+coarse-mesh_11.vtu
+Elapsed time is 9.800994157791138
+: Ciao:)
