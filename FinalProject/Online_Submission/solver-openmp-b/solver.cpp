@@ -289,9 +289,9 @@ void femSolver::explicitSolver()
         {
             // Evaluate right hand side at element level
             // Uncomment one of the following lines to switch between different scheduling strategies.
-            //#pragma omp for private(elem, M, F, K, TL, i, MTnewL) reduction(+: MTnew[0:nn]) schedule(static,128)
-            #pragma omp for private(elem, M, F, K, TL, i, MTnewL) reduction(+: MTnew[0:nn]) schedule(dynamic,512)
-            //#pragma omp for private(elem, M, F, K, TL, i, MTnewL) reduction(+: MTnew[0:nn]) schedule(guided,128)
+            #pragma omp for private(elem, M, F, K, TL, i, MTnewL) reduction(+: MTnew[0:nn]) schedule(static, 256)
+            //#pragma omp for private(elem, M, F, K, TL, i, MTnewL) reduction(+: MTnew[0:nn]) schedule(dynamic, 512) //default dynamic,512
+            //#pragma omp for private(elem, M, F, K, TL, i, MTnewL) reduction(+: MTnew[0:nn]) schedule(guided, 512)
             //#pragma omp for private(elem, M, F, K, TL, i, MTnewL) reduction(+: MTnew[0:nn]) schedule(auto)
             for(e=0; e<ne; e++)
             {
@@ -318,8 +318,8 @@ void femSolver::explicitSolver()
             partialL2error = 0.0;
             globalL2error = 0.0;
             // Uncomment one of the following lines to switch between different scheduling strategies.
-            //#pragma omp for private(pNode, massTmp, MT, Tnew) reduction(+:partialL2error) schedule(static)
-            #pragma omp for private(pNode, massTmp, MT, Tnew) reduction(+:partialL2error) schedule(dynamic,512)
+            #pragma omp for private(pNode, massTmp, MT, Tnew) reduction(+:partialL2error) schedule(static)
+            //#pragma omp for private(pNode, massTmp, MT, Tnew) reduction(+:partialL2error) schedule(dynamic,512)
             //#pragma omp for private(pNode, massTmp, MT, Tnew) reduction(+:partialL2error) schedule(guided,128)
             //#pragma omp for private(pNode, massTmp, MT, Tnew) reduction(+:partialL2error) schedule(auto)
             for(int i=0; i<nn; i++)
