@@ -1,5 +1,6 @@
 #!/usr/local/bin/python3
 
+from calendar import firstweekday
 import os
 import re
 import sys
@@ -7,13 +8,17 @@ import matplotlib.pyplot as plt
 import statistics as st
 import pgf
 
-
-
 # Extract timings
 timings = {}
 averageTimes = {}
 speedup = {}
 eff = {}
+All_Sp = {}
+All_Eff = {}
+
+meshes = ["coarse", "medium", "fine"]
+
+fs = 15
 
 # Plot Scaling
 def PlotScaling():
@@ -30,9 +35,10 @@ def PlotScaling():
     plt.plot(x,y)
     plt.savefig(os.getcwd() + "/Scaling.eps")
 
-def PlotSpeedUp(name):
+def PlotSpeedUp(name, all=False, Dir=None, label=None):
     fig = plt.figure(name)
-    fig.clear()
+    if not all:
+        fig.clear()
     ax = fig.gca()
     fig.subplots_adjust(bottom=0.2, left=0.2)
 
@@ -42,18 +48,26 @@ def PlotSpeedUp(name):
         p.append(i[0])
         Sp.append(i[1])
 
-    ax.set_xlabel("number of threads")
-    ax.set_ylabel(r"$S_p = \frac{T_1}{T_p}$", rotation=0, labelpad=30)
+    ax.set_xlabel("number of threads", fontsize=fs)
+    ax.set_ylabel(r"$S_p = \frac{T_1}{T_p}$", rotation=0, labelpad=30, fontsize=fs)
     ax.set_xlim(xmin=1, xmax = max(sorted(speedup.keys())))
     ax.set_ylim(ymin=0, ymax = max(sorted(speedup.values())))
     ax.grid()
     ax.xaxis.set_major_locator(plt.MultipleLocator(1))
-    ax.plot(p,Sp)  
-    plt.savefig(os.getcwd() + "/Speedup_" + name + ".eps")
+    plt.xticks(fontsize=fs)
+    plt.yticks(fontsize=fs)
+    if not all:
+        ax.plot(p,Sp)
+        plt.savefig(os.getcwd() + "/Speedup_" + name + ".eps")
+    else:
+        ax.plot(p,Sp, label=label)
+        ax.legend(loc="upper left", framealpha=1.0, fontsize=fs)
+        plt.savefig(Dir + "/SpeedUp.eps")
 
-def PlotEfficiency(name):
+def PlotEfficiency(name, all=False, Dir=None, label=None):
     fig = plt.figure(name)
-    fig.clear()
+    if not all:
+        fig.clear()
     ax = fig.gca()
     fig.subplots_adjust(bottom=0.2, left=0.2)
 
@@ -63,19 +77,30 @@ def PlotEfficiency(name):
         p.append(i[0])
         E.append(i[1])
 
-    ax.set_xlabel("number of threads")
-    ax.set_ylabel(r"$E_p = \frac{S_p}{p}$", rotation=0, labelpad=30)
+    ax.set_xlabel("number of threads", fontsize=fs)
+    ax.set_ylabel(r"$E_p = \frac{S_p}{p}$", rotation=0, labelpad=30, fontsize=fs)
     ax.set_xlim(xmin=1, xmax = max(sorted(eff.keys())))
     ax.set_ylim(ymin=0, ymax = max(sorted(eff.values())))
     ax.grid()
-    ax.xaxis.set_major_locator(plt.MultipleLocator(1))
-    ax.plot(p,E)  
-    plt.savefig(os.getcwd() + "/Efficiency_" + name + ".eps")
+    ax.xaxis.set_major_locator(plt.MultipleLocator(1)) 
+    plt.xticks(fontsize=fs)
+    plt.yticks(fontsize=fs)
+    if not all:
+        ax.plot(p,E) 
+        plt.savefig(os.getcwd() + "/Efficiency_" + name + ".eps")
+    else:
+        ax.plot(p,E, label=label) 
+        ax.legend(loc="upper right", framealpha=1.0, fontsize=fs)
+        plt.savefig(Dir + "/Efficiency.eps")
 
+def PlotAllInOne(Dir, l):
+    PlotEfficiency("all1", True, Dir, l)
+    PlotSpeedUp("all2",True, Dir, l)
+   
 def main():
-    print("Test 123")
     directory = os.getcwd()
-    for Dir in ["coarse", "medium", "fine"]:
+    
+    for Dir in meshes:
         print("plotting " + Dir +" ... ")
         os.chdir(directory + "/" + Dir)
 
@@ -111,6 +136,7 @@ def main():
         print(eff)
         PlotSpeedUp(Dir)
         PlotEfficiency(Dir)
+        PlotAllInOne(directory, Dir)
 
 if __name__ == "__main__":
     main()
