@@ -22,7 +22,7 @@ def savePgf(path, factor=0.55):
     # Fixes cropped labels
     plt.tight_layout()
     # Save as pgf
-    plt.savefig("/home/johannesg/scratch/results/BA_simulations/thesis_plots/" + path) #bbox_inches='tight')
+    plt.savefig("/Users/johannes/Desktop/FinalProjectRepo/FinalProject/Online_Submission/report/plots/" + path) #bbox_inches='tight')
 
 #To optionally set font
 """ font = {'family' : 'sans',

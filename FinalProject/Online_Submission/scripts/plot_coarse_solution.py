@@ -1,10 +1,10 @@
 #!/usr/local/bin/python3
 
-from cmath import pi
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import math
+import pgf
 
 class TemperatureDist:
     R1 = 0.01
@@ -65,6 +65,7 @@ class TemperatureDist:
         leg = ax.legend(fontsize=fs)
         
         plt.savefig(os.getcwd() + "/TemperatureDist.eps")
+        pgf.savePgf("serial/TemperatureDist.pgf", factor=0.8)
 
 directory = os.fsencode(os.getcwd())
 Tmp = []    
