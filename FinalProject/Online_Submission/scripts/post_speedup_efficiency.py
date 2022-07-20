@@ -20,85 +20,77 @@ meshes = ["coarse", "medium", "fine"]
 
 fs = 15
 
-# Plot Scaling
-def PlotScaling():
-    x = []
-    y = []
-    for i in sorted(timings.items()):
-        x.append(i[0])
-        y.append(st.mean([float(k) for k in i[1]]))
-    
-    print(x)
-    print(y)
-    plt.xlabel("number of processors ")
-    plt.ylabel("time [s]")
-    plt.plot(x,y)
-    plt.savefig(os.getcwd() + "/Scaling.eps")
+loc = {'S' : '', 'E' : '', 'R' : ''}
 
-def PlotSpeedUp(name, all=False, Dir=None, label=None):
+def setLoc(Ptype):
+
+    if Ptype == "OpenMP":
+        loc['S'] = "upper left"
+        loc['E'] = "upper right"
+        loc['R'] = "upper right"
+        
+    elif Ptype == "MPI":
+        loc['S'] = "upper right"
+        loc['E'] = "upper right"
+        loc['R'] = "upper right"
+
+def PlotOverProcessors(dict_, name, xlabel, ylabel, filename, loc, all=False, Dir=None, label= None, PlotOpt=False):
     fig = plt.figure(name)
     if not all:
         fig.clear()
     ax = fig.gca()
     fig.subplots_adjust(bottom=0.2, left=0.2)
 
-    p = []
-    Sp = []
-    for i in sorted(speedup.items()):
-        p.append(i[0])
-        Sp.append(i[1])
+    x = []
+    y = []
+    for i in sorted(dict_.items()):
+        x.append(i[0])
+        y.append(i[1])
 
-    ax.set_xlabel("number of threads", fontsize=fs)
-    ax.set_ylabel(r"$S_p = \frac{T_1}{T_p}$", rotation=0, labelpad=30, fontsize=fs)
-    ax.set_xlim(xmin=1, xmax = max(sorted(speedup.keys())))
-    ax.set_ylim(ymin=0, ymax = max(sorted(speedup.values())))
+    ax.set_xlabel(xlabel, fontsize=fs)
+    ax.set_ylabel(ylabel, rotation=0, labelpad=30, fontsize=fs)
+    
+    ax.set_xlim(xmin=1, xmax = max(sorted(dict_.keys())))
+    
+    Max = max(sorted(dict_.values()))
+    if PlotOpt and filename == "Efficiency":
+        Max += 0.1 * Max
+    ax.set_ylim(ymin=0, ymax = Max)
+    
     ax.grid()
     ax.xaxis.set_major_locator(plt.MultipleLocator(1))
     plt.xticks(fontsize=fs)
     plt.yticks(fontsize=fs)
+
     if not all:
-        ax.plot(p,Sp)
-        plt.savefig(os.getcwd() + "/Speedup_" + name + ".eps")
+        if PlotOpt and filename == "Efficiency":
+            ax.plot(x,y, label=label)
+            ax.plot(x, [1 for i in x], label = 'optimum')
+            ax.legend(loc='center right', framealpha=1.0, fontsize=fs)
+        else:
+            ax.plot(x,y)
+        plt.savefig(os.getcwd() + "/" + filename + "_" + name + ".eps")
     else:
-        ax.plot(p,Sp, label=label)
-        ax.legend(loc="upper left", framealpha=1.0, fontsize=fs)
-        plt.savefig(Dir + "/SpeedUp.eps")
+        ax.plot(x,y, label=label)
+        if PlotOpt and filename == "Efficiency" and label == "fine":
+            ax.plot(x, [1 for i in x], label = 'optimum')
+            loc = 'center right'
+        ax.legend(loc = loc, framealpha=1.0, fontsize=fs)
+        plt.savefig(Dir + "/" + filename + ".eps")
 
-def PlotEfficiency(name, all=False, Dir=None, label=None):
-    fig = plt.figure(name)
-    if not all:
-        fig.clear()
-    ax = fig.gca()
-    fig.subplots_adjust(bottom=0.2, left=0.2)
-
-    p = []
-    E = []
-    for i in sorted(eff.items()):
-        p.append(i[0])
-        E.append(i[1])
-
-    ax.set_xlabel("number of threads", fontsize=fs)
-    ax.set_ylabel(r"$E_p = \frac{S_p}{p}$", rotation=0, labelpad=30, fontsize=fs)
-    ax.set_xlim(xmin=1, xmax = max(sorted(eff.keys())))
-    ax.set_ylim(ymin=0, ymax = max(sorted(eff.values())))
-    ax.grid()
-    ax.xaxis.set_major_locator(plt.MultipleLocator(1)) 
-    plt.xticks(fontsize=fs)
-    plt.yticks(fontsize=fs)
-    if not all:
-        ax.plot(p,E) 
-        plt.savefig(os.getcwd() + "/Efficiency_" + name + ".eps")
-    else:
-        ax.plot(p,E, label=label) 
-        ax.legend(loc="upper right", framealpha=1.0, fontsize=fs)
-        plt.savefig(Dir + "/Efficiency.eps")
-
-def PlotAllInOne(Dir, l):
-    PlotEfficiency("all1", True, Dir, l)
-    PlotSpeedUp("all2",True, Dir, l)
-   
+def PlotAllInOne(Dir, l, PlotOpt=False):
+    PlotOverProcessors(speedup, "all1", "number of threads", r"$S_p = \frac{T_1}{T_p}$", "SpeedUp", loc['S'], True, Dir, l)
+    PlotOverProcessors(eff, "all2", "number of threads", r"$E_p = \frac{S_p}{p}$", "Efficiency", loc['E'],True, Dir, l, PlotOpt=PlotOpt)
+    PlotOverProcessors(averageTimes, "all3", "number of threads", r"$T [s]$", "Runtime", loc['R'],True, Dir, l)
+    
 def main():
     directory = os.getcwd()
+
+    setLoc(sys.argv[1])
+
+    PlotOpt = False
+    if sys.argv[1] == "MPI":
+        PlotOpt = True
     
     for Dir in meshes:
         print("plotting " + Dir +" ... ")
@@ -134,9 +126,11 @@ def main():
         
         print(speedup)
         print(eff)
-        PlotSpeedUp(Dir)
-        PlotEfficiency(Dir)
-        PlotAllInOne(directory, Dir)
+        PlotOverProcessors(speedup, Dir, "number of threads", r"$S_p = \frac{T_1}{T_p}$", "SpeedUp", loc['S'])
+        PlotOverProcessors(eff, Dir, "number of threads", r"$E_p = \frac{S_p}{p}$", "Efficiency", loc['E'], label = Dir, PlotOpt=PlotOpt)
+        PlotOverProcessors(averageTimes, Dir, "number of threads", r"$T [s]$", "Runtime", loc['R'])
+        
+        PlotAllInOne(directory, Dir, PlotOpt=PlotOpt)
 
 if __name__ == "__main__":
     main()
