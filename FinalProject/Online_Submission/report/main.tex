@@ -3,19 +3,35 @@
 
 \begin{document}
 
-\mtitle{Some Interesting Simulation Sciences Stuff}
+\mtitle{Final Report}
 
-\mauthor{Some student}{Some application supervisor}
+\mauthor{Parallel Computing for Computational Mechanics}
 
-\maff{Laboratory for Parallel Programming}{student@rwth-aachen.de}{supervisor@grs-sim.de}
+\maff{Johannes Grafen 380149}{johannes.grafen@rwth-aachen.de}
 
 \mabstract{\blindtext}
 
 \section{Introduction}
 
-\nocite{midsummer}
+%\nocite{midsummer}
 
-\blindtext
+The parallelisation of code for the simulation of complex mechanical systems is a key-topic in modern computational mechanics. Constantly increasing computing power of high-performance clusters allow for the simulation of large and complex systems. This requires an efficient parallelisation approach, where different parallelisation paradigms can be of use. \\
+
+In this report the parallelisation of a finite element code for the simulation of the stationary temperature distribution on a two-dimensional disk is investigated. For the shared memory approach the OpenMP library is used, where as the distributed memory approach is assessed by using a one-sided parallelisation approach with MPI. The different parallelisation approaches are discussed and compared for different number of CPUs. This report is structured as follows. In the second chapter \textit{Theory and Methods} are presented. The \textit{Implementation and Validation} of the presented problem is discussed in chapter 3. The results of the optimisation of the runtime of the code is illustrated in chapter 4 \textit{Results} and the assessment of the different optimisation techniques is discussed in chapter 5 \textit{Discussion}. Finally, this report is closed with a \textit{Conclusion} in chapter 6.
+
+serial optimisation is performed by  
+
+\section{Theory and Methods}
+
+\section{Implementation and Validation}
+
+\subsection*{Parallelisation with OpenMP}
+
+\subsection*{Parallelisation with MPI}
+
+\section{Results}
+
+\section{Discussion}
 
 \section{Conclusion}
 
