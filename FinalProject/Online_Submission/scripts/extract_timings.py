@@ -2,12 +2,19 @@
 
 import os
 import re
+import sys
+
+reOutput = ""
+if sys.argv[1] == "mpi":
+    reOutput = r"output_(?:coarse|medium|fine)_(\d+)CPU.*"
+elif sys.argv[1] == "openmp":
+    reOutput = r"out_(\d+)CPU_.*"
 
 directory = os.fsencode(os.getcwd())
 timings = {}
 for file in os.listdir(directory):
      filename = os.fsdecode(file)
-     match = re.match(r"out_(\d+)CPU_.*", filename)
+     match = re.match(reOutput, filename)
      if match: 
         with open(file,'r') as f:
             for line in f:

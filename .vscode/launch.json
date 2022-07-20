@@ -1,0 +1,31 @@
+{
+"configurations": [
+    {
+    "name": "C++ Launch",
+    "type": "cppdbg",
+    "request": "launch",
+    "program": "/hpcwork/pn744180/parallel_computing/Homework_2/code/test/2d_Unsteady",
+    "stopAtEntry": false,
+    "customLaunchSetupCommands": [
+      { "text": "target-run", "description": "run target", "ignoreFailures": false }
+    ],
+    "logging" : {
+        "moduleLoad": false,
+        "trace": true
+    },
+    "launchCompleteCommand": "exec-run",
+    "linux": {
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/local_host/bin/gdb"
+    },
+    "osx": {
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/local_host/bin/gdb"
+    },
+    "windows": {
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:\\MinGw\\bin\\gdb.exe"
+    }
+    }
+]
+}

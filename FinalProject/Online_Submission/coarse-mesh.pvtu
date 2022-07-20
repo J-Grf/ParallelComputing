@@ -8,5 +8,20 @@
       <PDataArray type="Float64" Name="Points" NumberOfComponents="3"/>
     </PPoints>
     <Piece Source="coarse-mesh_0.vtu"/>
+    <Piece Source="coarse-mesh_1.vtu"/>
+    <Piece Source="coarse-mesh_2.vtu"/>
+    <Piece Source="coarse-mesh_3.vtu"/>
+    <Piece Source="coarse-mesh_4.vtu"/>
+    <Piece Source="coarse-mesh_5.vtu"/>
+    <Piece Source="coarse-mesh_6.vtu"/>
+    <Piece Source="coarse-mesh_7.vtu"/>
+    <Piece Source="coarse-mesh_8.vtu"/>
+    <Piece Source="coarse-mesh_9.vtu"/>
+    <Piece Source="coarse-mesh_10.vtu"/>
+    <Piece Source="coarse-mesh_11.vtu"/>
+    <Piece Source="coarse-mesh_12.vtu"/>
+    <Piece Source="coarse-mesh_13.vtu"/>
+    <Piece Source="coarse-mesh_14.vtu"/>
+    <Piece Source="coarse-mesh_15.vtu"/>
   </PUnstructuredGrid>
 </VTKFile>
