@@ -21,6 +21,19 @@
 \usepackage{nomencl}
 \usepackage{doi}
 
+\newcommand{\pp}[2]{\frac{\partial #1}{\partial #2}}%   partielle Ableitung
+\newcommand{\tensor}[1]{\overline{\overline{#1}}}%      Tensor
+\usepackage{bm}
+\newcommand{\vect}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+\newcommand{\refFig}[1]{Fig. \ref{#1}}
+\newcommand{\refEq}[1]{Eq. (\ref{#1})}
+\newcommand{\refEqs}[2]{Eqs. (\ref{#1}) and (\ref{#2})}
+\newcommand{\refSec}[1]{Sec. \ref{#1}}
+\newcommand{\refTab}[1]{Tab. \ref{#1}}
+\newcommand{\refCh}[1]{Ch. \ref{#1}}
+
+
 \begin{document}
 
 \mtitle{Final Report}
@@ -35,25 +48,29 @@
 
 %\nocite{midsummer}
 
-The parallelisation of code for the simulation of complex mechanical systems is a key-topic in modern computational mechanics. Constantly increasing computing power of high-performance clusters allow for the simulation of large and complex systems. This requires an efficient parallelisation approach, where different parallelisation paradigms can be of use. \\
+The parallelization of code for the simulation of complex mechanical systems is a key-topic in modern computational mechanics. Constantly increasing computing power of high-performance clusters allow for the simulation of large and complex systems. This requires an efficient parallelization approach, where different parallelization paradigms can be of use. \\
 
-In this report the parallelisation of a finite element code for the simulation of the stationary temperature distribution on a two-dimensional disk is investigated. For the shared memory approach the OpenMP library is used, where as the distributed memory approach is assessed by using a one-sided parallelisation approach with MPI. The different parallelisation approaches are discussed and compared for different number of CPUs. This report is structured as follows. In the second chapter \textit{Theory and Methods} are presented. The \textit{Implementation and Validation} of the presented problem is discussed in chapter 3. The results of the optimisation of the runtime of the code is illustrated in chapter 4 \textit{Results} and the assessment of the different optimisation techniques is discussed in chapter 5 \textit{Discussion}. Finally, this report is closed with a \textit{Conclusion} in chapter 6.
+In this report the parallelization of a finite element code for the simulation of the stationary temperature distribution on a two-dimensional disk is investigated. For the shared memory approach the OpenMP library is used, where as the distributed memory approach is assessed by using a one-sided parallelization approach with MPI. The different parallelization approaches are discussed and compared for different number of CPUs. This report is structured as follows. In the second chapter \textit{Theory and Methods} are presented. The \textit{Implementation and Validation} of the presented problem is discussed in chapter 3. The results of the optimization of the runtime of the code is illustrated in chapter 4 \textit{Results} and the assessment of the different optimization techniques is discussed in chapter 5 \textit{Discussion}. Finally, this report is closed with a \textit{Conclusion} in chapter 6.
 
-serial optimisation is performed by  
+serial optimization is performed by  
 
 \section{Theory and Methods}
 
+
+- describe different meshes
+
 \section{Implementation and Validation}
 
-\subsection*{Parallelisation with OpenMP}
+\subsection*{Parallelization with OpenMP}
 
-\subsection*{Parallelisation with MPI}
+\subsection*{Parallelization with MPI}
 
 \section{Results}
 
 \subsection{Serial Solver}
 
-\subsubsection*{R1 a}
+\subsubsection*{R1 a)}
+For the validation of the FEM solver, the solution of the coarse mesh is compared to the analytical solution in \refFig{fig::TemperatureDist}. The numeric solution is in good agreement with the analytical solution. Slight deviations are observed at the disk's center where the temperature distribution has it's global maximum. Accounting for large changes in the temperature gradient at the center of the disk. 
 
 \begin{figure}[!htbp]
 	\centering
@@ -63,6 +80,45 @@ serial optimisation is performed by
 	\caption{Comparison of the steady-state temperature distribution of the analytical solution (refEQ) and the numerical solution on the coarse mesh}
 	\label{fig::TemperatureDist}
 \end{figure}
+
+In order to decrease the serial runtime of the implemented solver, different compiler flags were tested and assessed by comparing their influence on the solver runtime. The code is compiled with the Intel C++ Compiler (v19.1). The compiled code is tested on a Intel Platinum 8160 which is based on Intel's Skylake architecture using the "medium" unstructured mesh with 21650 nodes resulting in 21332 triangular elements.
+
+The investigated compiler flags are contained in \refTab{tab:SerialTimings}.
+In the following subsection the individual compiler flags are briefly presented and explained: 
+ 
+\subsubsection*{-O0}
+The capital number behind the capital "O" refers to the optimization level and performs general optimizations by bundling several individual compiler flags. Using the base Level (0),  the compiler will disable all optimizations. This is useful for debugging (section R1 b).
+
+\subsubsection*{-O1}
+Optimization Level 1 includes the optimization for speed, but disables all optimizations that increase code size and affect the codes speed. It includes the analysis of data-flow, code motion, strength reduction and further performance enhancing options.
+
+\subsubsection*{-O2}
+The second optimization level includes vectorization, which allows for concurrent execution of the separate steps that are necessary to perform different basic mathematical operations on array-like data structures. Such as an element wise addition of an array. A scalar or "Von Neumann" processor would simply perform all four necessary steps for each index step by step. Where as a vector processor allows for concurrent operations. This prevents that instruction units are idle, while waiting on a task to be finished.
+
+The option also enables the inlining of intrinsics and intra-file inlining of functions. Which means the replacement of the function call with the instructions inside of a certain function itself. This can cause significant performance gain, especially if functions are called multiple times inside the body of a loop.
+
+\subsubsection*{-O3}
+Performs O2 optimizations with higher thresholds and enables more aggressive loop transformations such as Fusion, Block-Unroll-and-Jam, and collapsing IF-statements. It can be used with the option "-ax" to force the compiler to do a more aggressive data dependency analysis and optimize for a certain CPU architecture. Where "x" refers to the CPU's instruction set.
+
+\subsubsection*{-Ofast}
+On Linux systems this sets "-O3 -no-prec-div -fp-model fast=2". This causes the compiler to enhance the code with alle possible optimizations of "-O3" and reduce the precision of floating-point divides.
+
+\subsubsection*{-ax \textit{arch}}
+Optimization of instruction set for a specific hardware architecure of the CPU. As the simulations were conducted on a two-socket node with two Intel Platinum 8160 with each 24 cores, based on the Skylake architecture. The shortest runtime was achieved with the flag "-axSKYLAKE-AVX512". Where AVX512 is the abbreviation for \textit{Advanced Vector Extensions} with 512-bit instructions and is an extension of the SIMD instruction set. 
+
+\subsubsection*{-fp-model fast}
+This flag controls the precision of floating-point operations. Using Level 2, enables a more aggressive optimization of floating-point calculations. This might decrease accuracy.
+
+\subsubsection*{-ipo}
+Enables the interprocedural optimization between files functions from different files may be inlined.
+
+\subsubsection*{-unroll}
+Performs loop unrolling which helps to exploit multiple instruction units, by increasing the stride length of the loop variable and performing the same operation on multiple array elements in one stride. 
+\\
+\citep{anmeyRWTHHPCClusterUser, behrLectureParallelComputing, QuickReferenceGuide, IntelCompilerClassic2022}
+\\
+\\
+The runtimes that were measured for the different compiler flags are shown in \refTab{tab:SerialTimings}. For each flag, three measurements on a single core with a single thread where taken and the average time was determined. The shortest runtime is achieved by using the compiler flag combination "-O3 -axSKYLAKE-AVX512" resulting in an average runtime of 54.77 seconds which is 4.37 times faster that the not optimised code (-O0). For further investigations, assessing the parallel optimisation with OpenMP and MPI, the "-O3 -axSKYLAKE-AVX512" flag combination was used.
 
 \renewcommand{\arraystretch}{2}
 \begin{table}[h!]
@@ -84,22 +140,24 @@ serial optimisation is performed by
 			\hline
 			-O3 -fp-model fast=2 & 57.69 & 56.19 & 57.89 & 57.26\\
 			\hline
+			-O3 -axSKYLAKE-AVX512 & 53.99 & 54.06 & 56.25 & \textbf{54.77}\\
+			\hline
 			-O3 -ipo & 54.57 & 57.26 & 60.38 & 57.40\\
 			\hline
 			-unroll & 55.17	& 57.01	& 55.94	& 56.04\\
 			\hline
-			-Ofast & 55.43	& 56.17	& 56.27	& \textbf{55.96}\\
+			-Ofast & 55.43	& 56.17	& 56.27	& 55.96\\
 			\hline
 			\hline
 		\end{tabular}
-		\caption{\label{tab:SerialTimings}  Timings of the various compiler flags for serial optimisation}
+		\caption{\label{tab:SerialTimings}  Timings of the various compiler flags for serial optimisation, the shortest achieved runtime is printed in bold font}
 	\end{center}
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-\subsubsection*{R1 b}
-- debugging
-- the code can't be properly debugged as the compiler changes complete code structure
+%\label{sec:R1b}
+\subsubsection*{R1 b)}
+A higher level of optimization can cause a decrease in the accuracy of the floating-point operations. For the validation of a certain code or high fidelity simulations, like the implemented FEM Solver, one is advised to minimize the numerical error, by using the highest level of accuracy. So the optimizations should not inflict with the desired results. Also for debugging purposes, optimization is not helpful as the compiler changes the code structure, when using more aggressive optimizations. To name a few effects: functions are inlined, loops are unrolled or fused together. This makes is very hard to search for bugs, when using debugging software.
 
 \subsection{Parallel OpenMP Solver}
 

@@ -19,77 +19,83 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \providecommand\BKM@entry[2]{}
-\BKM@entry{id=1,dest={73656374696F6E2E31},srcline={34}}{496E74726F64756374696F6E}
-\BKM@entry{id=2,dest={73656374696F6E2E32},srcline={44}}{5468656F727920616E64204D6574686F6473}
-\BKM@entry{id=3,dest={73656374696F6E2E33},srcline={46}}{496D706C656D656E746174696F6E20616E642056616C69646174696F6E}
-\BKM@entry{id=4,dest={73656374696F6E2E34},srcline={52}}{526573756C7473}
-\BKM@entry{id=5,dest={73756273656374696F6E2E342E31},srcline={54}}{53657269616C20536F6C766572}
+\BKM@entry{id=1,dest={73656374696F6E2E31},srcline={47}}{496E74726F64756374696F6E}
+\BKM@entry{id=2,dest={73656374696F6E2E32},srcline={57}}{5468656F727920616E64204D6574686F6473}
+\BKM@entry{id=3,dest={73656374696F6E2E33},srcline={62}}{496D706C656D656E746174696F6E20616E642056616C69646174696F6E}
+\BKM@entry{id=4,dest={73656374696F6E2E34},srcline={68}}{526573756C7473}
+\BKM@entry{id=5,dest={73756273656374696F6E2E342E31},srcline={70}}{53657269616C20536F6C766572}
 \babel@aux{english}{}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Theory and Methods}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Implementation and Validation}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{2}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Serial Solver}{2}{subsection.4.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Comparison of the steady-state temperature distribution of the analytical solution (refEQ) and the numerical solution on the coarse mesh\relax }}{2}{figure.caption.4}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig::TemperatureDist}{{1}{2}{Comparison of the steady-state temperature distribution of the analytical solution (refEQ) and the numerical solution on the coarse mesh\relax }{figure.caption.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces  Timings of the various compiler flags for serial optimisation\relax }}{2}{table.caption.5}\protected@file@percent }
-\newlabel{tab:SerialTimings}{{1}{2}{Timings of the various compiler flags for serial optimisation\relax }{table.caption.5}{}}
-\BKM@entry{id=6,dest={73756273656374696F6E2E342E32},srcline={104}}{506172616C6C656C204F70656E4D5020536F6C766572}
-\BKM@entry{id=7,dest={73756273656374696F6E2E342E33},srcline={294}}{506172616C6C656C204D504920536F6C766572}
-\BKM@entry{id=8,dest={73656374696F6E2E35},srcline={376}}{44697363757373696F6E}
-\BKM@entry{id=9,dest={73656374696F6E2E36},srcline={380}}{436F6E636C7573696F6E}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Theory and Methods}{3}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Implementation and Validation}{3}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{3}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Serial Solver}{3}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Parallel OpenMP Solver}{3}{subsection.4.2}\protected@file@percent }
-\newlabel{fig::OpenMPA}{{2a}{3}{OpenMP task A\relax }{figure.caption.8}{}}
-\newlabel{sub@fig::OpenMPA}{{a}{3}{OpenMP task A\relax }{figure.caption.8}{}}
-\newlabel{fig::OpenMPB}{{2b}{3}{OpenMP task B\relax }{figure.caption.8}{}}
-\newlabel{sub@fig::OpenMPB}{{b}{3}{OpenMP task B\relax }{figure.caption.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  Timings for solver with different OpenMP optimisations using the coarse mesh\relax }}{3}{figure.caption.8}\protected@file@percent }
-\newlabel{fig::OpenMP1}{{2}{3}{Timings for solver with different OpenMP optimisations using the coarse mesh\relax }{figure.caption.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  Comparison of different scheduling options (static, dynamic, guided, auto) for different chunk sizes(128, 256, 512) in first parallelised loop for 4 threads using the finest mesh\relax }}{4}{figure.caption.10}\protected@file@percent }
-\newlabel{fig::Scheduleing}{{3}{4}{Comparison of different scheduling options (static, dynamic, guided, auto) for different chunk sizes(128, 256, 512) in first parallelised loop for 4 threads using the finest mesh\relax }{figure.caption.10}{}}
-\newlabel{fig::SPOpenMP}{{4a}{4}{Speed-up\relax }{figure.caption.12}{}}
-\newlabel{sub@fig::SPOpenMP}{{a}{4}{Speed-up\relax }{figure.caption.12}{}}
-\newlabel{fig::EffOpenMP}{{4b}{4}{Efficiency\relax }{figure.caption.12}{}}
-\newlabel{sub@fig::EffOpenMP}{{b}{4}{Efficiency\relax }{figure.caption.12}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  Speed-up and efficiencies for coarse, medium and fine mesh for different numbers of threads\relax }}{4}{figure.caption.12}\protected@file@percent }
-\newlabel{fig::EffSPOpenMP}{{4}{4}{Speed-up and efficiencies for coarse, medium and fine mesh for different numbers of threads\relax }{figure.caption.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Parallel MPI Solver}{4}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{4}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{4}{section.6}\protected@file@percent }
+\citation{anmeyRWTHHPCClusterUser,behrLectureParallelComputing,QuickReferenceGuide,IntelCompilerClassic2022}
+\BKM@entry{id=6,dest={73756273656374696F6E2E342E32},srcline={162}}{506172616C6C656C204F70656E4D5020536F6C766572}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces  Timings of the various compiler flags for serial optimisation, the shortest achieved runtime is printed in bold font\relax }}{4}{table.caption.14}\protected@file@percent }
+\newlabel{tab:SerialTimings}{{1}{4}{Timings of the various compiler flags for serial optimisation, the shortest achieved runtime is printed in bold font\relax }{table.caption.14}{}}
+\BKM@entry{id=7,dest={73756273656374696F6E2E342E33},srcline={352}}{506172616C6C656C204D504920536F6C766572}
+\newlabel{fig::OpenMPA}{{2a}{5}{OpenMP task A\relax }{figure.caption.17}{}}
+\newlabel{sub@fig::OpenMPA}{{a}{5}{OpenMP task A\relax }{figure.caption.17}{}}
+\newlabel{fig::OpenMPB}{{2b}{5}{OpenMP task B\relax }{figure.caption.17}{}}
+\newlabel{sub@fig::OpenMPB}{{b}{5}{OpenMP task B\relax }{figure.caption.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  Timings for solver with different OpenMP optimisations using the coarse mesh\relax }}{5}{figure.caption.17}\protected@file@percent }
+\newlabel{fig::OpenMP1}{{2}{5}{Timings for solver with different OpenMP optimisations using the coarse mesh\relax }{figure.caption.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  Comparison of different scheduling options (static, dynamic, guided, auto) for different chunk sizes(128, 256, 512) in first parallelised loop for 4 threads using the finest mesh\relax }}{5}{figure.caption.19}\protected@file@percent }
+\newlabel{fig::Scheduleing}{{3}{5}{Comparison of different scheduling options (static, dynamic, guided, auto) for different chunk sizes(128, 256, 512) in first parallelised loop for 4 threads using the finest mesh\relax }{figure.caption.19}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Parallel OpenMP Solver}{5}{subsection.4.2}\protected@file@percent }
+\BKM@entry{id=8,dest={73656374696F6E2E35},srcline={434}}{44697363757373696F6E}
+\BKM@entry{id=9,dest={73656374696F6E2E36},srcline={438}}{436F6E636C7573696F6E}
 \bibstyle{unsrt}
 \bibdata{literature}
-\newlabel{fig::Rcoarse}{{5a}{6}{coarse mesh\relax }{figure.caption.13}{}}
-\newlabel{sub@fig::Rcoarse}{{a}{6}{coarse mesh\relax }{figure.caption.13}{}}
-\newlabel{fig::Rmedium}{{5b}{6}{medium mesh\relax }{figure.caption.13}{}}
-\newlabel{sub@fig::Rmedium}{{b}{6}{medium mesh\relax }{figure.caption.13}{}}
-\newlabel{fig::Rfine}{{5c}{6}{fine mesh\relax }{figure.caption.13}{}}
-\newlabel{sub@fig::Rfine}{{c}{6}{fine mesh\relax }{figure.caption.13}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  Runtime for coarse, medium and fine mesh for different number of threads\relax }}{6}{figure.caption.13}\protected@file@percent }
-\newlabel{fig::Runtime}{{5}{6}{Runtime for coarse, medium and fine mesh for different number of threads\relax }{figure.caption.13}{}}
-\newlabel{fig::RcoarseMPI}{{6a}{7}{coarse mesh\relax }{figure.caption.16}{}}
-\newlabel{sub@fig::RcoarseMPI}{{a}{7}{coarse mesh\relax }{figure.caption.16}{}}
-\newlabel{fig::RmediumMPI}{{6b}{7}{medium mesh\relax }{figure.caption.16}{}}
-\newlabel{sub@fig::RmediumMPI}{{b}{7}{medium mesh\relax }{figure.caption.16}{}}
-\newlabel{fig::RfineMPI}{{6c}{7}{fine mesh\relax }{figure.caption.16}{}}
-\newlabel{sub@fig::RfineMPI}{{c}{7}{fine mesh\relax }{figure.caption.16}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  Runtime for coarse, medium and fine mesh for different number of cores\relax }}{7}{figure.caption.16}\protected@file@percent }
-\newlabel{fig::RuntimeMPI}{{6}{7}{Runtime for coarse, medium and fine mesh for different number of cores\relax }{figure.caption.16}{}}
-\newlabel{fig::SPcoarseMPI}{{7a}{7}{coarse mesh\relax }{figure.caption.17}{}}
-\newlabel{sub@fig::SPcoarseMPI}{{a}{7}{coarse mesh\relax }{figure.caption.17}{}}
-\newlabel{fig::SPmediumMPI}{{7b}{7}{medium mesh\relax }{figure.caption.17}{}}
-\newlabel{sub@fig::SPmediumMPI}{{b}{7}{medium mesh\relax }{figure.caption.17}{}}
-\newlabel{fig::SPfineMPI}{{7c}{7}{fine mesh\relax }{figure.caption.17}{}}
-\newlabel{sub@fig::SPfineMPI}{{c}{7}{fine mesh\relax }{figure.caption.17}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  Speed-up for coarse, medium and fine mesh for different number of cores\relax }}{7}{figure.caption.17}\protected@file@percent }
-\newlabel{fig::SpeedUpMPI}{{7}{7}{Speed-up for coarse, medium and fine mesh for different number of cores\relax }{figure.caption.17}{}}
-\newlabel{fig::EffcoarseMPI}{{8a}{7}{coarse mesh\relax }{figure.caption.18}{}}
-\newlabel{sub@fig::EffcoarseMPI}{{a}{7}{coarse mesh\relax }{figure.caption.18}{}}
-\newlabel{fig::EffmediumMPI}{{8b}{7}{medium mesh\relax }{figure.caption.18}{}}
-\newlabel{sub@fig::EffmediumMPI}{{b}{7}{medium mesh\relax }{figure.caption.18}{}}
-\newlabel{fig::EfffineMPI}{{8c}{7}{fine mesh\relax }{figure.caption.18}{}}
-\newlabel{sub@fig::EfffineMPI}{{c}{7}{fine mesh\relax }{figure.caption.18}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  Efficiency for coarse, medium and fine mesh for different number of cores\relax }}{7}{figure.caption.18}\protected@file@percent }
-\newlabel{fig::EffMPI}{{8}{7}{Efficiency for coarse, medium and fine mesh for different number of cores\relax }{figure.caption.18}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces  Partitioning of medium mesh using 8 cores\relax }}{8}{figure.caption.20}\protected@file@percent }
-\newlabel{fig::partition}{{9}{8}{Partitioning of medium mesh using 8 cores\relax }{figure.caption.20}{}}
+\bibcite{anmeyRWTHHPCClusterUser}{{1}{}{{}}{{}}}
+\bibcite{behrLectureParallelComputing}{{2}{}{{}}{{}}}
+\bibcite{QuickReferenceGuide}{{3}{}{{}}{{}}}
+\bibcite{IntelCompilerClassic2022}{{4}{}{{}}{{}}}
+\providecommand\NAT@force@numbers{}\NAT@force@numbers
+\newlabel{fig::SPOpenMP}{{4a}{6}{Speed-up\relax }{figure.caption.21}{}}
+\newlabel{sub@fig::SPOpenMP}{{a}{6}{Speed-up\relax }{figure.caption.21}{}}
+\newlabel{fig::EffOpenMP}{{4b}{6}{Efficiency\relax }{figure.caption.21}{}}
+\newlabel{sub@fig::EffOpenMP}{{b}{6}{Efficiency\relax }{figure.caption.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  Speed-up and efficiencies for coarse, medium and fine mesh for different numbers of threads\relax }}{6}{figure.caption.21}\protected@file@percent }
+\newlabel{fig::EffSPOpenMP}{{4}{6}{Speed-up and efficiencies for coarse, medium and fine mesh for different numbers of threads\relax }{figure.caption.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Parallel MPI Solver}{6}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{6}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{6}{section.6}\protected@file@percent }
+\newlabel{fig::Rcoarse}{{5a}{7}{coarse mesh\relax }{figure.caption.22}{}}
+\newlabel{sub@fig::Rcoarse}{{a}{7}{coarse mesh\relax }{figure.caption.22}{}}
+\newlabel{fig::Rmedium}{{5b}{7}{medium mesh\relax }{figure.caption.22}{}}
+\newlabel{sub@fig::Rmedium}{{b}{7}{medium mesh\relax }{figure.caption.22}{}}
+\newlabel{fig::Rfine}{{5c}{7}{fine mesh\relax }{figure.caption.22}{}}
+\newlabel{sub@fig::Rfine}{{c}{7}{fine mesh\relax }{figure.caption.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  Runtime for coarse, medium and fine mesh for different number of threads\relax }}{7}{figure.caption.22}\protected@file@percent }
+\newlabel{fig::Runtime}{{5}{7}{Runtime for coarse, medium and fine mesh for different number of threads\relax }{figure.caption.22}{}}
+\newlabel{fig::RcoarseMPI}{{6a}{8}{coarse mesh\relax }{figure.caption.25}{}}
+\newlabel{sub@fig::RcoarseMPI}{{a}{8}{coarse mesh\relax }{figure.caption.25}{}}
+\newlabel{fig::RmediumMPI}{{6b}{8}{medium mesh\relax }{figure.caption.25}{}}
+\newlabel{sub@fig::RmediumMPI}{{b}{8}{medium mesh\relax }{figure.caption.25}{}}
+\newlabel{fig::RfineMPI}{{6c}{8}{fine mesh\relax }{figure.caption.25}{}}
+\newlabel{sub@fig::RfineMPI}{{c}{8}{fine mesh\relax }{figure.caption.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  Runtime for coarse, medium and fine mesh for different number of cores\relax }}{8}{figure.caption.25}\protected@file@percent }
+\newlabel{fig::RuntimeMPI}{{6}{8}{Runtime for coarse, medium and fine mesh for different number of cores\relax }{figure.caption.25}{}}
+\newlabel{fig::SPcoarseMPI}{{7a}{8}{coarse mesh\relax }{figure.caption.26}{}}
+\newlabel{sub@fig::SPcoarseMPI}{{a}{8}{coarse mesh\relax }{figure.caption.26}{}}
+\newlabel{fig::SPmediumMPI}{{7b}{8}{medium mesh\relax }{figure.caption.26}{}}
+\newlabel{sub@fig::SPmediumMPI}{{b}{8}{medium mesh\relax }{figure.caption.26}{}}
+\newlabel{fig::SPfineMPI}{{7c}{8}{fine mesh\relax }{figure.caption.26}{}}
+\newlabel{sub@fig::SPfineMPI}{{c}{8}{fine mesh\relax }{figure.caption.26}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  Speed-up for coarse, medium and fine mesh for different number of cores\relax }}{8}{figure.caption.26}\protected@file@percent }
+\newlabel{fig::SpeedUpMPI}{{7}{8}{Speed-up for coarse, medium and fine mesh for different number of cores\relax }{figure.caption.26}{}}
+\newlabel{fig::EffcoarseMPI}{{8a}{8}{coarse mesh\relax }{figure.caption.27}{}}
+\newlabel{sub@fig::EffcoarseMPI}{{a}{8}{coarse mesh\relax }{figure.caption.27}{}}
+\newlabel{fig::EffmediumMPI}{{8b}{8}{medium mesh\relax }{figure.caption.27}{}}
+\newlabel{sub@fig::EffmediumMPI}{{b}{8}{medium mesh\relax }{figure.caption.27}{}}
+\newlabel{fig::EfffineMPI}{{8c}{8}{fine mesh\relax }{figure.caption.27}{}}
+\newlabel{sub@fig::EfffineMPI}{{c}{8}{fine mesh\relax }{figure.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  Efficiency for coarse, medium and fine mesh for different number of cores\relax }}{8}{figure.caption.27}\protected@file@percent }
+\newlabel{fig::EffMPI}{{8}{8}{Efficiency for coarse, medium and fine mesh for different number of cores\relax }{figure.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces  Partitioning of medium mesh using 8 cores\relax }}{9}{figure.caption.29}\protected@file@percent }
+\newlabel{fig::partition}{{9}{9}{Partitioning of medium mesh using 8 cores\relax }{figure.caption.29}{}}

@@ -1,3 +1,20 @@
-\begin{thebibliography}{}
+\begin{thebibliography}{1}
+
+\bibitem{anmeyRWTHHPCClusterUser}
+Dieter {an Mey}, Christian Terboven, Paul Kapinos, Dirk Schmidl, Sandra Wienke,
+  and Tim Cramer.
+\newblock The {{RWTH HPC-Cluster User}}'s {{Guide Version}} 8.4.0.
+
+\bibitem{behrLectureParallelComputing}
+Marek Behr.
+\newblock Lecture: {{Parallel Computing}} for {{Computational Mechanics}}.
+
+\bibitem{QuickReferenceGuide}
+Quick {{Reference Guide}} to {{Optimization}} with {{Intel}}\textregistered{}
+  {{C}}++ and {{Fortran Compilers}} v19.
+
+\bibitem{IntelCompilerClassic2022}
+{{Intel}}\textregistered{} {{C}}++ {{Compiler Classic Developer Guide}} and
+  {{Reference}}, April 2022.
 
 \end{thebibliography}
