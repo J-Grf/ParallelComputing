@@ -61,8 +61,11 @@ class TemperatureDist:
         ax.plot(rA, TmpA, label = "analytic")
 
         ax.set_xlabel("r in [m]", fontsize=fs)
-        ax.set_ylabel("T in [K]", fontsize=fs)
-        leg = ax.legend(fontsize=fs)
+        ax.set_ylabel("T in [K]", fontsize=fs, rotation=0, labelpad = 20)
+        ax.set_xlim(xmin = -0.1, xmax = 0.1)
+        leg = ax.legend(fontsize=fs,framealpha=1.0)
+        leg.get_frame().set_edgecolor('k')
+        ax.grid()
         
         plt.savefig(os.getcwd() + "/TemperatureDist.eps")
         pgf.savePgf("serial/TemperatureDist.pgf", factor=0.8)

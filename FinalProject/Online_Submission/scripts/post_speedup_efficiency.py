@@ -81,7 +81,6 @@ def PlotOverProcessors(dict_, name, xlabel, ylabel, filename, loc, pointOffSetX,
             ax.scatter(x,y)
             for index in range(len(x)):
                 ax.text(x[index] + pointOffSetX[filename], y[index] + pointOffSetY[filename][label], round(y[index],2), size = pointS)
-            ax.plot(x, [1 for i in x], label = 'optimum')
             
             ax.legend(loc='center right', framealpha=1.0, fontsize=fs)
         else:
@@ -98,16 +97,15 @@ def PlotOverProcessors(dict_, name, xlabel, ylabel, filename, loc, pointOffSetX,
                 ax.text(x[index] + pointOffSetX[filename], y[index] + pointOffSetY[filename]['fine'], round(y[index],2), size = pointS)
         if PlotOpt and filename == "Efficiency" and label == "fine":
             ax.plot(x, [1 for i in x], label = 'optimum')
-            ax.scatter(x, [1 for i in x])
             loc = 'center right'
         ax.legend(loc = loc, framealpha=1.0, fontsize=fs)
         plt.savefig(Dir + "/" + filename + ".eps")
         pgf.savePgf(PType + "/" + filename + ".pgf", factor=f)
 
-def PlotAllInOne(Dir, l, pointOX, pointOY, PlotOpt=False, PType=None):
-    PlotOverProcessors(speedup, "all1", "number of threads", r"$S_p = \frac{T_1}{T_p}$", "SpeedUp", loc['S'], pointOX, pointOY, all = True, Dir = Dir, label = l, PType=PType)
-    PlotOverProcessors(eff, "all2", "number of threads", r"$E_p = \frac{S_p}{p}$", "Efficiency", loc['E'], pointOX, pointOY, all = True, Dir = Dir, label = l, PlotOpt=PlotOpt, PType=PType)
-    PlotOverProcessors(averageTimes, "all3", "number of threads", r"$T [s]$", "Runtime", loc['R'], pointOX, pointOY, all = True, Dir = Dir, label = l, PType=PType)
+def PlotAllInOne(Dir, l, xLabel, pointOX, pointOY, PlotOpt=False, PType=None):
+    PlotOverProcessors(speedup, "all1", xLabel, r"$S_p = \frac{T_1}{T_p}$", "SpeedUp", loc['S'], pointOX, pointOY, all = True, Dir = Dir, label = l, PType=PType)
+    PlotOverProcessors(eff, "all2", xLabel, r"$E_p = \frac{S_p}{p}$", "Efficiency", loc['E'], pointOX, pointOY, all = True, Dir = Dir, label = l, PlotOpt=PlotOpt, PType=PType)
+    PlotOverProcessors(averageTimes, "all3", xLabel, r"$T [s]$", "Runtime", loc['R'], pointOX, pointOY, all = True, Dir = Dir, label = l, PType=PType)
     
 def main():
     directory = os.getcwd()
@@ -120,6 +118,8 @@ def main():
     pointOffSetY = {'SpeedUp' : {}, 'Efficiency' : {}, 'Runtime' : {}}
 
     PType = ""
+
+    xLabel = ""
     if sys.argv[1] == "MPI":
         PlotOpt = True
         PType = "MPI"
@@ -127,13 +127,15 @@ def main():
         pointOffSetY['SpeedUp'] = {'coarse' : 0.025, 'medium' : 0.04, 'fine' : 0.05}
         pointOffSetY['Efficiency'] = {'coarse' : 0.025, 'medium' : 0.025, 'fine' : 0.025} 
         pointOffSetY['Runtime'] = {'coarse' : -0.7, 'medium' : -10, 'fine' : -50}
+        xLabel = "number of cores"
     elif sys.argv[1] == "OpenMP":    
         PType = "OpenMP"
         pointOffSetX = {'SpeedUp' : 0.0, 'Efficiency' : 0.0, 'Runtime' : 0.0}
         pointOffSetY['SpeedUp'] = {'coarse' : 0.025, 'medium' : 0.1, 'fine' : 0.15}
         pointOffSetY['Efficiency'] = {'coarse' : 0.025, 'medium' : 0.025, 'fine' : 0.025} 
         pointOffSetY['Runtime'] = {'coarse' : 0.04, 'medium' : 1.4, 'fine' : 15}
-    
+        xLabel = "number of threads"
+
     for Dir in meshes:
         print("plotting " + Dir +" ... ")
         os.chdir(directory + "/" + Dir)
@@ -168,11 +170,11 @@ def main():
         
         print(speedup)
         print(eff)
-        PlotOverProcessors(speedup, Dir, "number of threads", r"$S_p = \frac{T_1}{T_p}$", "SpeedUp", loc['S'], pointOffSetX, pointOffSetY, label = Dir, PType=PType)
-        PlotOverProcessors(eff, Dir, "number of threads", r"$E_p = \frac{S_p}{p}$", "Efficiency", loc['E'], pointOffSetX, pointOffSetY, label = Dir, PlotOpt=PlotOpt, PType=PType)
-        PlotOverProcessors(averageTimes, Dir, "number of threads", r"$T [s]$", "Runtime", loc['R'], pointOffSetX, pointOffSetY, label = Dir, PType=PType)
+        PlotOverProcessors(speedup, Dir, xLabel, r"$S_p = \frac{T_1}{T_p}$", "SpeedUp", loc['S'], pointOffSetX, pointOffSetY, label = Dir, PType=PType)
+        PlotOverProcessors(eff, Dir, xLabel, r"$E_p = \frac{S_p}{p}$", "Efficiency", loc['E'], pointOffSetX, pointOffSetY, label = Dir, PlotOpt=PlotOpt, PType=PType)
+        PlotOverProcessors(averageTimes, Dir, xLabel, r"$T [s]$", "Runtime", loc['R'], pointOffSetX, pointOffSetY, label = Dir, PType=PType)
         
-        PlotAllInOne(directory, Dir, pointOffSetX, pointOffSetY, PlotOpt=PlotOpt, PType=PType)
+        PlotAllInOne(directory, Dir, xLabel, pointOffSetX, pointOffSetY, PlotOpt=PlotOpt, PType=PType)
 
 if __name__ == "__main__":
     main()

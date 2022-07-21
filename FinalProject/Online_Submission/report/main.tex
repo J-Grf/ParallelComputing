@@ -1,6 +1,26 @@
 \documentclass[a4paper, 11pt, oneside]{scrartcl}
 \usepackage{lpp}
 
+\usepackage{mathcomp}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{epstopdf}
+\usepackage{makeidx}
+\usepackage{mathtools} 
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{etoolbox}
+\usepackage[toc,page]{appendix}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes.geometric, arrows, positioning, patterns}
+%\usepackage[caption=false,subrefformat=parens,labelformat=parens]{subfig}
+\usepackage{nomencl}
+\usepackage{doi}
+
 \begin{document}
 
 \mtitle{Final Report}
@@ -31,7 +51,331 @@ serial optimisation is performed by
 
 \section{Results}
 
+\subsection{Serial Solver}
+
+\subsubsection*{R1 a}
+
+\begin{figure}[!htbp]
+	\centering
+	%\hspace*{0.8cm}
+	\leavevmode
+	\resizebox{0.8\width}{!}{\input{plots/serial/TemperatureDist.pgf}}
+	\caption{Comparison of the steady-state temperature distribution of the analytical solution (refEQ) and the numerical solution on the coarse mesh}
+	\label{fig::TemperatureDist}
+\end{figure}
+
+\renewcommand{\arraystretch}{2}
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{| p{5cm} | p{1.5cm} p{1.5cm} p{1.5cm} | p{1.5cm} | }
+			\hline
+			\hline
+			compiler flag & time 1 & time 2 & time 3 & average time\\
+			\hline
+			-O0 (no optimisation) & 233.71	& 241.5	& 243.02 & 239.41 \\
+			\hline
+			-O1 & 62.41	& 63.71	& 62.76	& 62.96\\
+			\hline
+			-O2 & 56.96	& 55.39	& 57.11	& 56.49\\
+			\hline 
+			-O3 & 55.49	& 55.23	& 57.8	& 56.17\\
+			\hline
+			-O3 -axSSE4.2, SSSE3, SSE2 -fp-model fast=2 & 56.17	& 56.21	& 56.46	& 56.18\\
+			\hline
+			-O3 -fp-model fast=2 & 57.69 & 56.19 & 57.89 & 57.26\\
+			\hline
+			-O3 -ipo & 54.57 & 57.26 & 60.38 & 57.40\\
+			\hline
+			-unroll & 55.17	& 57.01	& 55.94	& 56.04\\
+			\hline
+			-Ofast & 55.43	& 56.17	& 56.27	& \textbf{55.96}\\
+			\hline
+			\hline
+		\end{tabular}
+		\caption{\label{tab:SerialTimings}  Timings of the various compiler flags for serial optimisation}
+	\end{center}
+\end{table}
+\renewcommand{\arraystretch}{1}
+
+\subsubsection*{R1 b}
+- debugging
+- the code can't be properly debugged as the compiler changes complete code structure
+
+\subsection{Parallel OpenMP Solver}
+
+\subsubsection*{R2 a}
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}[h!]{.49\textwidth}
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				ybar,
+				width = 0.85 * \textwidth,
+				height = 8cm,
+				major x tick style = transparent,
+				bar width = 14pt,
+				ymajorgrids = true,
+				ylabel = {Runtime in [s]},
+				symbolic x coords = {1 Thread, 2 Threads, 4 Threads},
+				xtick = data,
+				scaled y ticks = false,
+				enlarge x limits = 0.25,
+				ymin = 0,
+				nodes near coords,
+				node near coord style={black}
+%				legend cell align=left,
+%				legend style={
+%					at={(1,1.05)},
+%					anchor=south east,
+%					column sep=1ex
+%				}
+				]
+				\addplot [style={blue, fill=blue, mark=none}]
+				coordinates{ (1 Thread, 8.06) (2 Threads, 63.4) (4 Threads, 140.76)};
+			\end{axis}
+		\end{tikzpicture}
+		\caption{\label{fig::OpenMPA} OpenMP task A}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[h!]{.49\textwidth}
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				ybar,
+				width = 0.85 * \textwidth,
+				height = 8cm,
+				major x tick style = transparent,
+				bar width = 14pt,
+				ymajorgrids = true,
+				ylabel = {Runtime in [s]},
+				symbolic x coords = {1 Thread, 2 Threads, 4 Threads},
+				xtick = data,
+				scaled y ticks = false,
+				enlarge x limits = 0.25,
+				ymin = 0,
+				nodes near coords,
+				node near coord style={black}
+%				legend cell align=left,
+%				legend style={
+%					at={(1,1.05)},
+%					anchor=south east,
+%					column sep=1ex
+%				}
+				]
+				\addplot [style={red, fill=red, mark=none}]
+				coordinates{ (1 Thread, 1.33) (2 Threads, 1.26) (4 Threads, 1.12)};
+			\end{axis}
+		\end{tikzpicture}
+		\caption{\label{fig::OpenMPB} OpenMP task B}
+	\end{subfigure}
+\caption{\label{fig::OpenMP1} Timings for solver with different OpenMP optimisations using the coarse mesh}
+\end{figure}
+
+\subsubsection*{R2 b}
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			ybar,
+			width = 0.85 * \textwidth,
+			height = 8cm,
+			major x tick style = transparent,
+			bar width = 14pt,
+			ymajorgrids = true,
+			ylabel = {Runtime in [s]},
+			symbolic x coords = {static, dynamic, guided, auto},
+			xtick = data,
+			scaled y ticks = false,
+			enlarge x limits = 0.25,
+			ymin = 0,
+			nodes near coords,
+			node near coord style={black, anchor=east, rotate=90},
+			legend cell align=left,
+			legend style={
+					at={(1,1.05)},
+					anchor=south east,
+					column sep=1ex
+				}
+			]
+			\addplot 
+			coordinates{ (static, 184.81) (dynamic, 241.53) (guided, 222.85)};
+			
+			\addplot
+			coordinates{ (static, 184.06) (dynamic, 237.72) (guided, 226.06)};
+			
+			\addplot
+			coordinates{ (static, 188.59) (dynamic, 232.95) (guided, 216.26)};
+			
+			\addplot
+			coordinates{(auto, 220.97)};
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\label{fig::Scheduleing} Comparison of different scheduling options (static, dynamic, guided, auto) for different chunk sizes(128, 256, 512) in first parallelised loop for 4 threads using the finest mesh}
+\end{figure}
+
+\subsubsection*{R2 c}
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/OpenMP/SpeedUp.pgf}}
+		\caption{\label{fig::SPOpenMP} Speed-up}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/OpenMP/Efficiency.pgf}}
+		\caption{\label{fig::EffOpenMP} Efficiency}
+	\end{subfigure}
+	\caption{\label{fig::EffSPOpenMP} Speed-up and efficiencies for coarse, medium and fine mesh for different numbers of threads}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.8\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/OpenMP/Runtime_coarse.pgf}}
+		\caption{\label{fig::Rcoarse} coarse mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.8\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/OpenMP/Runtime_medium.pgf}}
+		\caption{\label{fig::Rmedium} medium mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.8\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/OpenMP/Runtime_fine.pgf}}
+		\caption{\label{fig::Rfine} fine mesh}
+	\end{subfigure}
+	\caption{\label{fig::Runtime} Runtime for coarse, medium and fine mesh for different number of threads}
+\end{figure}
+
+%\renewcommand{\arraystretch}{2}
+%\begin{table}[h!]
+%	\begin{center}
+%	\begin{subtable}{0.8\textwidth}
+%		\begin{tabular}{| p{5cm} | p{1.5cm} p{1.5cm} p{1.5cm} | p{1.5cm} | }
+%			\hline
+%			\hline
+%			number of threads & time1 & tim2 & time3 & average time \\
+%			\hline
+%			1 & 1.30684	& 1.24179 & 1.28846 & 1.28\\
+%			\hline
+%			2 &	1.43304	& 1.51202 & 1.63023	& 1.53\\
+%			\hline
+%			4 & 1.18422	& 1.07168 &	1.26715	& 1.17\\
+%			\hline
+%			6 &	1.19 & 1.14537 & 1.19051 & 1.17\\
+%			\hline
+%			8	1,22	1,1795	1,13683	1,18
+%			\hline
+%			12	1,15932	1,12042	1,20255	1,16
+%			\hline
+%			\hline
+%		\end{tabular}
+%		\caption{\label{tab:sSerialTimings}  Timings of the various compiler flags for serial optimisation}
+%	\end{subtable}
+%	
+%	\caption{\label{tab:sSesrialTimings}  Timings of the various compiler flags for serial optimisation}
+%	\end{center}
+%\end{table}
+%\renewcommand{\arraystretch}{1}
+
+\subsubsection*{R2 d}
+- look into presentation
+
+\subsection{Parallel MPI Solver}
+
+\subsubsection*{R3 a}
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/Runtime_coarse.pgf}}
+		\caption{\label{fig::RcoarseMPI} coarse mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/Runtime_medium.pgf}}
+		\caption{\label{fig::RmediumMPI} medium mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/Runtime_fine.pgf}}
+		\caption{\label{fig::RfineMPI} fine mesh}
+	\end{subfigure}
+	\caption{\label{fig::RuntimeMPI} Runtime for coarse, medium and fine mesh for different number of cores}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/SpeedUp_coarse.pgf}}
+		\caption{\label{fig::SPcoarseMPI} coarse mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/SpeedUp_medium.pgf}}
+		\caption{\label{fig::SPmediumMPI} medium mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/SpeedUp_fine.pgf}}
+		\caption{\label{fig::SPfineMPI} fine mesh}
+	\end{subfigure}
+	\caption{\label{fig::SpeedUpMPI} Speed-up for coarse, medium and fine mesh for different number of cores}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/Efficiency_coarse.pgf}}
+		\caption{\label{fig::EffcoarseMPI} coarse mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/Efficiency_medium.pgf}}
+		\caption{\label{fig::EffmediumMPI} medium mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\resizebox{0.33\width}{!}{\input{plots/MPI/Efficiency_fine.pgf}}
+		\caption{\label{fig::EfffineMPI} fine mesh}
+	\end{subfigure}
+	\caption{\label{fig::EffMPI} Efficiency for coarse, medium and fine mesh for different number of cores}
+\end{figure}
+
+\subsubsection*{R3 b}
+
+\begin{figure}[h!]
+	\centering
+	\resizebox{0.25\width}{!}{\includegraphics{plots/MPI/partitioning/partitioning.png}}
+	\caption{\label{fig::partition} Partitioning of medium mesh using 8 cores}
+\end{figure}
+
+\subsubsection*{R3 c}
+
+\subsubsection*{R3 d}
+
 \section{Discussion}
+
+
 
 \section{Conclusion}
 
