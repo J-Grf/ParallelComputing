@@ -20,6 +20,7 @@
 %\usepackage[caption=false,subrefformat=parens,labelformat=parens]{subfig}
 \usepackage{nomencl}
 \usepackage{doi}
+\usepackage{url}
 
 \usepackage{listings}
 \usepackage{xcolor}
@@ -85,7 +86,19 @@ serial optimization is performed by
 
 \section{Implementation and Validation}
 
-\subsection*{Parallelization with OpenMP}
+\subsection{R1 a)}
+For the validation of the FEM solver, the solution of the coarse mesh is compared to the analytical solution in \refFig{fig::TemperatureDist}. The numeric solution is in good agreement with the analytical solution. Slight deviations are observed at the disk's center where the temperature distribution has it's global maximum. Accounting for large changes in the temperature gradient at the center of the disk. 
+
+\begin{figure}[!htbp]
+	\centering
+	%\hspace*{0.8cm}
+	\leavevmode
+	\resizebox{0.8\width}{!}{\input{plots/serial/TemperatureDist.pgf}}
+	\caption{Comparison of the steady-state temperature distribution of the analytical solution (refEQ) and the numerical solution on the coarse mesh}
+	\label{fig::TemperatureDist}
+\end{figure}
+
+\subsection{Parallelization with OpenMP}
 
 A critical region is to be executed by only one thread at a time. This is important to prevent data races. A data race means that multiple threads try to access and manipulate the same variable / memory address at the same time. This might lead to unpredictable behavior, which can result in incorrect computations. 
 
@@ -152,26 +165,16 @@ A critical region is to be executed by only one thread at a time. This is import
 		globalL2error = sqrt(partialL2error/nn);
 \end{lstlisting}
 
-\subsection*{Parallelization with MPI}
+\subsection{Parallelization with MPI}
 
-\section{Results}
+\section{Results and Discussion}
 
-\subsection{Serial Solver}
+
+\subsection{Serial Solver \label{sec:Serial}}
 
 To run the finite element solver as efficient and fast a possible in parallel, it is important that the serial performance is optimized. Therefore, the effect on the runtime of multiple compiler flags is compared in this section.
 
-\subsubsection*{R1 a)}
-For the validation of the FEM solver, the solution of the coarse mesh is compared to the analytical solution in \refFig{fig::TemperatureDist}. The numeric solution is in good agreement with the analytical solution. Slight deviations are observed at the disk's center where the temperature distribution has it's global maximum. Accounting for large changes in the temperature gradient at the center of the disk. 
-
-\begin{figure}[!htbp]
-	\centering
-	%\hspace*{0.8cm}
-	\leavevmode
-	\resizebox{0.8\width}{!}{\input{plots/serial/TemperatureDist.pgf}}
-	\caption{Comparison of the steady-state temperature distribution of the analytical solution (refEQ) and the numerical solution on the coarse mesh}
-	\label{fig::TemperatureDist}
-\end{figure}
-
+\subsubsection{R1 a)}
 In order to decrease the serial runtime of the implemented solver, different compiler flags were tested and assessed by comparing their influence on the solver runtime. The code is compiled with the Intel C++ Compiler (v19.1). The compiled code is tested on a Intel Platinum 8160 which is based on Intel's Skylake architecture using the "medium" unstructured mesh with 21650 nodes resulting in 21332 triangular elements.
 
 The investigated compiler flags are contained in \refTab{tab:SerialTimings}.
@@ -247,14 +250,14 @@ The runtimes that were measured for the different compiler flags are shown in \r
 \renewcommand{\arraystretch}{1}
 
 %\label{sec:R1b}
-\subsubsection*{R1 b)}
+\subsubsection{R1 b)}
 A higher level of optimization can cause a decrease in the accuracy of the floating-point operations. For the validation of a certain code or high fidelity simulations, like the implemented FEM Solver, one is advised to minimize the numerical error, by using the highest level of accuracy. So the optimizations should not inflict with the desired results. Also for debugging purposes, optimization is not helpful as the compiler changes the code structure, when using more aggressive optimizations. To name a few effects: functions are inlined, loops are unrolled or fused together. This makes is very hard to search for bugs, when using debugging software.
 
 \subsection{Parallel OpenMP Solver}
 
 In this section the performance gain by parallelization with OpenMP of the two most time consuming loops is investigated (\refCode{Code:OpenMP}).  
 
-\subsubsection*{R2 a)}
+\subsubsection{R2 a)}
 
 First, two different OpenMP parallelization approaches are compared an discussed. The Approaches are denoted with "A)" and "B)" in the code extract in \refCode{Code:OpenMP}. Approach A) uses critical regions, which are executed by each thread serially for the computation of the RHS at element-level and the partial L2 errors. Where as approach B) is performing a reduction operation for the determination of MTnew and the partial L2 error, using a dynamic scheduling with a chunk size of 512 for both loops. 
 
@@ -331,7 +334,7 @@ As presented in \refFig{fig::OpenMP1}, the runtimes of the approach A) (\refFig{
 
 As the critical regions of approach A) are to be executed by only one thread at a time, the runtime will increase with an increasing number of threads, as observed in \refFig{fig::OpenMPA}. A large overhead is created due to the management of lock, to ensure that only one thread at a time is running through a critical region. This overhead increases with a higher number of threads. While one thread is executing a critical region the other threads have to wait for this specific thread to finish this section. Only if this thread has completely finished to computations inside a critical region the next thread is allowed to execute this region for its assigned loop indices. To prevent the overhead of multiple locks and to allow threads to work in parallel the reduction keyword for openMP is used. The reduction operation for the computation of the RHS at element level for each element node, allows each thread to first compute local sums of the each MTnew entry in parallel and then performs a serial summation of all local sums to obtain the value of an MTnew entry. But this serial summation is only computed once, compared to the critical region. The same procedure applies also for the computation of the partial L2 error. 
 
-\subsubsection*{R2 b)}
+\subsubsection{R2 b)}
 
 To further optimize the parallelization with OpenMP, different scheduling options and chunk sizes are investigated for approach B) (\refCode{Code:OpenMP}). Therefore simulations on the fine mesh with a constant number of 4 threads were conducted. Some unexplained behavior was observed, when using scheduling options other than static for the second loop in which the partial L2 error are computed, where the L2 error gets initialized again with 0, which leads to an untimely convergence of the simulation. Therefore different scheduling options and chunk sizes were first only applied for the first loop (line 15 \refCode{Code:OpenMP}) for the computation of the RHS on element level. For the second loop (line 45 \refCode{Code:OpenMP}) a static scheduling with default chunk size was used. The results are presented in \refFig{fig::Scheduling}. 
 In general the static scheduling performs best with a shortest runtime of 184.06 seconds for a chunk size of 256. In general larger runtimes are observed for the dynamic and guided scheduling options. For dynamic scheduling a larger chunk size of 512 iterations leads to shorter runtimes, where as for static and guided scheduling the medium chunk size of 256 iterations performs best. The runtime of the auto scheduling is at 220.97 seconds, which is marked in grey in \refFig{fig::Scheduling}.
@@ -409,8 +412,7 @@ In addition to the introductory investigations regarding the different schedulin
 	\caption{\label{fig::OpenMPStatic} Runtimes for parallelization of loop in line 15 and loop in line 45 in \refCode{Code:OpenMP} with static scheduling and the same option for chunk size }
 \end{figure}
 
-\newpage
-\subsubsection*{R2 c)}
+\subsubsection{R2 c)}
 
 To evaluate the performance gain by using multiple threads for the parallelization approach B) with static scheduling and default chunk size, the runtime, the speed-up (\refEq{eq:SpeedUp}) and the Efficiency (\refEq{eq:Efficiency}) are computed for 1, 2,4, 6, 8 and 12 threads and plotted in  \refFig{fig::Runtime} and \refFig{fig::EffSPOpenMP}. The Speed-up is defined as 
 %
@@ -470,14 +472,22 @@ Overall the highest speed-up is observed for 12 threads the fine mesh with a 6.1
 	\caption{\label{fig::EffSPOpenMP} Speed-up and efficiencies for coarse, medium and fine mesh for different numbers of threads}
 \end{figure}
 
-\subsubsection*{R2 d)}
+\subsubsection{R2 d)}
 This short subsection is dedicated to the default values of the chunk sizes for different scheduling methods. The default scheduling for OpenMP usage on an intel compiler is static. The default chunk size of static is determined by the quotient of the number of loop iterations and the number of threads. For dynamic scheduling the default chunk size is 1. Lastly, the dehault chunk size for guided scheduling is proportional to the number of unassigned iterations divided by the number of the threads. This means the chunk size dynamically decreases for guided scheduling. The scheduling option auto delegated the decision to the scheduling type to the compiler or runtime of the system \cite{spehOpenMPScheduling2016}.
 
 \subsection{Parallel MPI Solver}
 
-\subsubsection*{R3 a)}
+In this section the mpi parallelization of the FEM Solver (reference) is examined regarding it's parallel performance. 
 
+\subsubsection{R3 a)}
 
+\refFig{fig::RuntimeMPI} presents the different runtimes for three different meshes that have different level of refinement. The FEM code was run for 1,2,4,6,8,12 and 16 cores, using the compiler flags for best serial performance (\refSec{sec:Serial}). 
+
+For the coarse mesh the shortest average runtime is at 1.52 seconds with 2 cores (\refFig{fig::RcoarseMPI}), for the medium mesh at 64.69 seconds also with 2 cores (\refFig{fig::RmediumMPI}) and for the fine mesh at 342.57 seconds, which is achieved with 4 cores (\refFig{fig::RfineMPI}). 
+
+In \refFig{fig::MPI}, speed-up and efficiency are illustrated for the different meshes. As already observed in the runtime plots, the best speed-up for the coarse and medium mesh is obtained with 2 cores with a speed-up of 1.26 and 1.22, respectively. For the fine mesh the parallelized code ran fastest with 4 cores, resulting in a speed-up of 2.32. The efficiency graphs show an expected development as the efficiency monotonically decreases with an increasing number of threads. For the MPI parallelization with 2 cores on the fine mesh a noticeable high efficiency with 100\% was measured, being at optimum efficiency, marked in orange in (\refFig{fig::EfffineMPI}). This means that 2 cores do not introduce nearly any communication overhead and a perfect scaling behavior can be achieved. 
+For the highest number of cores all meshes show a very poor efficiency between only 1-8\%. This is also due to the used partitioning approach, which is discussed in (\refSec{sec:partitioning}).
+Again the same principle applies for distributed memory parallelization. If time is the priority, then according to the speed-up plots, 2 cores should be choosen for the coarse and medium mesh and 4 cores for the fine mesh. If, on the other hand the core-hours are limited and the simulations are supposed to be as efficient as possible, a serial code execution would be most efficient for coarse and the medium mesh. For the fine mesh two cores would be optimal regarding efficiency as they showed excellent scaling behavior.
 \begin{figure}[h!]
 	\centering
 	\begin{subfigure}{0.7\textwidth}
@@ -500,6 +510,8 @@ This short subsection is dedicated to the default values of the chunk sizes for 
 	\caption{\label{fig::RuntimeMPI} Runtime for coarse, medium and fine mesh for different number of cores}
 \end{figure}
 \clearpage
+
+
 
 \begin{figure}[h!]
 	\centering
@@ -542,7 +554,9 @@ This short subsection is dedicated to the default values of the chunk sizes for 
 \end{figure}
 \clearpage
 
-\subsubsection*{R3 b)}
+\subsubsection{R3 b) \label{sec:partitioning}}
+
+The partitioning of the elements and nodes of the mesh among the individual cores is performed in a round-robin fashion, depending on how the mesh data structure is stored in the mesh input file. Each processors reads with a certain offset a specific amount of elements and nodes from this input file, that is distributed as evenly as possible between the different cores. This results in a more irregular distribution as it can be seen from \refFig{fig::partition}. This partitioning is far from optimal as it is in general recommended to use a partitioning with minimum boundary surfaces between different partitions. This will reduce the necessary communications between neighboring partitions. For a circular domain like this heat diffusion problem on a flat circular plate, a distributions of p similar circle sectors is advisable, where p represents the number of processors used. This partitioning will result in a minimization of the boundary surfaces.
 
 \begin{figure}[h!]
 	\centering
@@ -550,16 +564,28 @@ This short subsection is dedicated to the default values of the chunk sizes for 
 	\caption{\label{fig::partition} Partitioning of medium mesh using 8 cores}
 \end{figure}
 
-%TODO:
+\subsubsection{R3 c)}
 
-- Plots größer
+The overall performance of the code can be improved. Some speed-up is achieved, with the shortest runtime for two cores for the coarse and medium mesh and for four cores for the fine mesh. However the efficiency is poor, especially for a higher number of cores (\refFig{fig::MPI}). The current bottleneck is the communication overhead. A lot of loops (line numbers) run over all processors, which results in an increasing loop size for an increasing number of processors. Inside these loops a lot of MPI calls take place, which will result in high communication overhead. Therefore some kind of static data structure, which stores information for all nodes could help. Also a window-halo approach would be beneficial, which allows certain processors to store some data of directly neighboring elements and nodes, that are required for an efficient communication.
 
-\subsubsection*{R3 c)}
+Another way to improve the performance of the code is to couple shared memory parallelization on a loop level with OpenMP with the distributed memory parallelization with MPI on global mesh level. Meaning the loops, especially for computing the RHS on element level and for the computation of the L2 error can be parallelized with the proposed approach B) (\refCode{Code:OpenMP}) on each processor. So each processor executes or at least creates multiple threads. This approach is then called hybrid parallelization.
 
-\subsubsection*{R3 d)}
+\subsubsection{R3 d)}
 
-\section{Discussion}
+This section answers some general question regarding MPI commands and communication methods:\\
 
+1) Why do we use \textit{MPI\_Accumulate} in the code instead of \textit{MPI\_Put}?\\
+
+With the \textit{MPI\_Accumulate} function a reduction among all the processors of a certain variable or array elements can be performed. Like a summation or finding the maximum value throughout all processors. Put simply overwrites a value.\\
+
+2) What are the advantages of using one-sided MPU communication over two-sided MPI communication?\\
+
+On one hand, one-sided communication has no risk of deadlocks as the individual processors do not have to wait for send and receives of other processors in a communicator. Also the communication patterns are in general easier to implement for one-sided communication. On the other hand, the processors simply can read and write to another processor's memory. This however, is error prone and requires a thought-through communication. 
+Two-sided communication is more time-consuming or cumbersome to implement. But, through the send and receive approach, data encapsulation is ensured and the programmer is always aware of which data is exchanged between individual processors. But blocking methods that are required for two-sided communication can lead to an increase in waiting time.\\
+
+3)What advantage does MPI offer over OpenMP, what is a main obstacle of MPI?\\
+
+The difference in the MPI and the OpenMP parallelization approaches lies in the memory architecture. MPI is designed for a distributed memory approach, which does not make any limitations to the number of processors to be used. In contrast, OpenMP follows the shared memory approach, so this make the physical memory of a CPU the limitation for the number of threads. But the parallelisation with OpenMP is less elaborate as it can be easily added to existing code, when considering loop parallelization. MPI introduces a lot of additional overhead, when writing parallel code, due to specific MPI commands and the partitioning.
 
 
 \section{Conclusion}
@@ -567,6 +593,7 @@ This short subsection is dedicated to the default values of the chunk sizes for 
 \blindtext
 
 \bibliographystyle{unsrt}
+%\bibliographystyle{IEEEtran}
 \bibliography{literature}
 
 \end{document}
