@@ -4,7 +4,8 @@ PROJECT(2d_Unsteady)
 # Add compiler options in this clause
 # add_compile_options(-O3 -axSSE4.2,SSSE3,SSE2 -fp-model fast=2)
 # add_compile_options(-O3 -ipo -finline-functions)
-add_compile_options(-Ofast)
+# add_compile_options(-Ofast)
+add_compile_options(-O3 -axSKYLAKE-AVX512)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # require at least gcc 4.8

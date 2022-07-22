@@ -8,12 +8,5 @@
       <PDataArray type="Float64" Name="Points" NumberOfComponents="3"/>
     </PPoints>
     <Piece Source="medium-mesh_0.vtu"/>
-    <Piece Source="medium-mesh_1.vtu"/>
-    <Piece Source="medium-mesh_2.vtu"/>
-    <Piece Source="medium-mesh_3.vtu"/>
-    <Piece Source="medium-mesh_4.vtu"/>
-    <Piece Source="medium-mesh_5.vtu"/>
-    <Piece Source="medium-mesh_6.vtu"/>
-    <Piece Source="medium-mesh_7.vtu"/>
   </PUnstructuredGrid>
 </VTKFile>
