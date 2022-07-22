@@ -17,4 +17,8 @@ Quick {{Reference Guide}} to {{Optimization}} with {{Intel}}\textregistered{}
 {{Intel}}\textregistered{} {{C}}++ {{Compiler Classic Developer Guide}} and
   {{Reference}}, April 2022.
 
+\bibitem{spehOpenMPScheduling2016}
+Jaka {\v S}peh.
+\newblock {{OpenMP}}: {{For}} \& {{Scheduling}}, June 2016.
+
 \end{thebibliography}

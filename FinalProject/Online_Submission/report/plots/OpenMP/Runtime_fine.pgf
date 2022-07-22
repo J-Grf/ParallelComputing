@@ -105,6 +105,10 @@
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
 \begin{pgfscope}%
+\pgfsys@transformshift{5.119917in}{1.312398in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
 \pgfsys@transformshift{5.918071in}{1.237710in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
@@ -971,6 +975,7 @@
 \pgfpathlineto{\pgfqpoint{2.725453in}{1.598853in}}%
 \pgfpathlineto{\pgfqpoint{3.523607in}{1.451028in}}%
 \pgfpathlineto{\pgfqpoint{4.321762in}{1.290078in}}%
+\pgfpathlineto{\pgfqpoint{5.119917in}{1.312398in}}%
 \pgfpathlineto{\pgfqpoint{5.918071in}{1.237710in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
@@ -1047,6 +1052,12 @@
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
 \pgftext[x=4.321762in,y=1.370730in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont 117.49}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{textcolor}%
+\pgfsetfillcolor{textcolor}%
+\pgftext[x=5.119917in,y=1.393050in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont 121.65}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
