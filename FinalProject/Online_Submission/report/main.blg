@@ -1,11 +1,17 @@
 This is BibTeX, Version 0.99d (TeX Live 2020)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
+A level-1 auxiliary file: 0_Abstract.aux
+A level-1 auxiliary file: 1_Introduction.aux
+A level-1 auxiliary file: 2_Theory_and_Methods.aux
+A level-1 auxiliary file: 3_Implementation_and_Validation.aux
+A level-1 auxiliary file: 4_Results_and_Discussion.aux
+A level-1 auxiliary file: 5_Conclusion.aux
 The style file: unsrt.bst
 Database file #1: literature.bib
 You've used 6 entries,
             1791 wiz_defined-function locations,
-            472 strings with 4424 characters,
+            478 strings with 4559 characters,
 and the built_in function-call counts, 790 in all, are:
 = -- 48
 > -- 38

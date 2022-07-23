@@ -1,0 +1,421 @@
+\section{Results and Discussion}
+
+\subsection{Serial Solver \label{sec:Serial}}
+
+To run the finite element solver as efficient and fast a possible in parallel, it is important that the serial performance is optimized. Therefore, the effect on the runtime of multiple compiler flags is compared in this section.
+
+\subsubsection{R1 a)}
+In order to decrease the serial runtime of the implemented solver, different compiler flags were tested and assessed by comparing their influence on the solver runtime. The code is compiled with the Intel C++ Compiler (v19.1). The compiled code is tested on a Intel Platinum 8160 which is based on Intel's Skylake architecture using the "medium" unstructured mesh with 21650 nodes resulting in 21332 triangular elements.
+
+The investigated compiler flags are contained in \refTab{tab:SerialTimings}.
+In the following subsection the individual compiler flags are briefly presented and explained: 
+
+\subsubsection*{-O0}
+The capital number behind the capital "O" refers to the optimization level and performs general optimizations by bundling several individual compiler flags. Using the base Level (0),  the compiler will disable all optimizations. This is useful for debugging (section R1 b).
+
+\subsubsection*{-O1}
+Optimization Level 1 includes the optimization for speed, but disables all optimizations that increase code size and affect the codes speed. It includes the analysis of data-flow, code motion, strength reduction and further performance enhancing options.
+
+\subsubsection*{-O2}
+The second optimization level includes vectorization, which allows for concurrent execution of the separate steps that are necessary to perform different basic mathematical operations on array-like data structures. Such as an element wise addition of an array. A scalar or "Von Neumann" processor would simply perform all four necessary steps for each index step by step. Where as a vector processor allows for concurrent operations. This prevents that instruction units are idle, while waiting on a task to be finished.
+
+The option also enables the inlining of intrinsics and intra-file inlining of functions. Which means the replacement of the function call with the instructions inside of a certain function itself. This can cause significant performance gain, especially if functions are called multiple times inside the body of a loop.
+
+\subsubsection*{-O3}
+Performs O2 optimizations with higher thresholds and enables more aggressive loop transformations such as Fusion, Block-Unroll-and-Jam, and collapsing IF-statements. It can be used with the option "-ax" to force the compiler to do a more aggressive data dependency analysis and optimize for a certain CPU architecture. Where "x" refers to the CPU's instruction set.
+
+\subsubsection*{-Ofast}
+On Linux systems this sets "-O3 -no-prec-div -fp-model fast=2". This causes the compiler to enhance the code with alle possible optimizations of "-O3" and reduce the precision of floating-point divides.
+
+\subsubsection*{-ax \textit{arch}}
+Optimization of instruction set for a specific hardware architecture of the CPU. As the simulations were conducted on a two-socket node with two Intel Platinum 8160 with each 24 cores, based on the Skylake architecture. The shortest runtime was achieved with the flag "-axSKYLAKE-AVX512". Where AVX512 is the abbreviation for \textit{Advanced Vector Extensions} with 512-bit instructions and is an extension of the SIMD instruction set. 
+
+\subsubsection*{-fp-model fast}
+This flag controls the precision of floating-point operations. Using Level 2, enables a more aggressive optimization of floating-point calculations. This might decrease accuracy.
+
+\subsubsection*{-ipo}
+Enables the inter-procedural optimization between files functions from different files may be inlined.
+
+\subsubsection*{-unroll}
+Performs loop unrolling which helps to exploit multiple instruction units, by increasing the stride length of the loop variable and performing the same operation on multiple array elements in one stride. 
+\\
+\citep{anmeyRWTHHPCClusterUser, behrLectureParallelComputing, QuickReferenceGuide, IntelCompilerClassic2022}
+\\
+\\
+The runtimes that were measured for the different compiler flags are shown in \refTab{tab:SerialTimings}. For each flag, three measurements on a single core with a single thread where taken and the average time was determined. The shortest runtime is achieved by using the compiler flag combination "-O3 -axSKYLAKE-AVX512" resulting in an average runtime of 54.77 seconds which is 4.37 times faster that the not optimized code (-O0). For further investigations, assessing the parallel optimization with OpenMP and MPI, the "-O3 -axSKYLAKE-AVX512" flag combination was used.
+
+\renewcommand{\arraystretch}{2}
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{| p{5cm} | p{1.5cm} p{1.5cm} p{1.5cm} | p{1.5cm} | }
+			\hline
+			\hline
+			compiler flag & time 1 & time 2 & time 3 & average time\\
+			\hline
+			-O0 (no optimisation) & 233.71	& 241.5	& 243.02 & 239.41 \\
+			\hline
+			-O1 & 62.41	& 63.71	& 62.76	& 62.96\\
+			\hline
+			-O2 & 56.96	& 55.39	& 57.11	& 56.49\\
+			\hline 
+			-O3 & 55.49	& 55.23	& 57.8	& 56.17\\
+			\hline
+			-O3 -axSSE4.2, SSSE3, SSE2 -fp-model fast=2 & 56.17	& 56.21	& 56.46	& 56.18\\
+			\hline
+			-O3 -fp-model fast=2 & 57.69 & 56.19 & 57.89 & 57.26\\
+			\hline
+			-O3 -axSKYLAKE-AVX512 & 53.99 & 54.06 & 56.25 & \textbf{54.77}\\
+			\hline
+			-O3 -ipo & 54.57 & 57.26 & 60.38 & 57.40\\
+			\hline
+			-unroll & 55.17	& 57.01	& 55.94	& 56.04\\
+			\hline
+			-Ofast & 55.43	& 56.17	& 56.27	& 55.96\\
+			\hline
+			\hline
+		\end{tabular}
+		\caption{\label{tab:SerialTimings}  Timings of the various compiler flags for serial optimization, the shortest achieved runtime is printed in bold font}
+	\end{center}
+\end{table}
+\renewcommand{\arraystretch}{1}
+
+%\label{sec:R1b}
+\subsubsection{R1 b)}
+A higher level of optimization can cause a decrease in the accuracy of the floating-point operations. For the validation of a certain code or high fidelity simulations, like the implemented FEM Solver, one is advised to minimize the numerical error, by using the highest level of accuracy. So the optimizations should not inflict with the desired results. Also for debugging purposes, optimization is not helpful as the compiler changes the code structure, when using more aggressive optimizations. To name a few effects: functions are inlined, loops are unrolled or fused together. This makes is very hard to search for bugs, when using debugging software.
+
+\clearpage
+\subsection{Parallel OpenMP Solver}
+
+In this section the performance gain by parallelization with OpenMP of the two most time consuming loops is investigated (\refCode{Code:OpenMP}).  
+
+\subsubsection{R2 a)}
+
+First, two different OpenMP parallelization approaches are compared an discussed. The Approaches are denoted with "A)" and "B)" in the code extract in \refCode{Code:OpenMP}. Approach A) uses critical regions, which are executed by each thread serially for the computation of the RHS at element-level and the partial L2 errors. Where as approach B) is performing a reduction operation for the determination of MTnew and the partial L2 error, using a dynamic scheduling with a chunk size of 512 for both loops. 
+
+To compare both approaches, the runtimes for the simulation of the temperature distribution on the coarse mesh is determined for 1, 2 and 4 threads for each parallelization approach. Three runtimes were measured per thread count and averaged. 
+As presented in \refFig{fig::OpenMP1}, the runtimes of the approach A) (\refFig{fig::OpenMPA}) for different number of threads is in general significantly higher than the runtimes of approach B) (\refFig{fig::OpenMPB}), with a top runtime of 142.59 seconds for a run with 4 threads for approach A and a runtime of 1.01 seconds for approach B. The scaling behavior of approach B was found to be as theoretically expected, as the runtime decreases with an increasing number of threads. Due to the very short runtimes the run with 2 threads was measured to be slower than a run with only a single thread. This requires further investigations as possible fluctuations in the runtime, for instance due to memory access, are in the order of the runtime itself. Approach A shows the opposite dependency of thread number and runtime. The runtime increases with an increasing number of threads. 
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}[h!]{.49\textwidth}
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				ybar,
+				width = 0.85 * \textwidth,
+				height = 8cm,
+				major x tick style = transparent,
+				bar width = 14pt,
+				ymajorgrids = true,
+				ylabel = {Runtime in [s]},
+				symbolic x coords = {1 Thread, 2 Threads, 4 Threads},
+				xtick = data,
+				scaled y ticks = false,
+				enlarge x limits = 0.25,
+				ymin = 0,
+				nodes near coords,
+				node near coord style={black}
+				%				legend cell align=left,
+				%				legend style={
+					%					at={(1,1.05)},
+					%					anchor=south east,
+					%					column sep=1ex
+					%				}
+				]
+				\addplot [style={blue, fill=blue, mark=none}]
+				coordinates{ (1 Thread, 8.34) (2 Threads, 68.32) (4 Threads, 142.59)};
+			\end{axis}
+		\end{tikzpicture}
+		\caption{\label{fig::OpenMPA} OpenMP task A}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[h!]{.49\textwidth}
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				ybar,
+				width = 0.85 * \textwidth,
+				height = 8cm,
+				major x tick style = transparent,
+				bar width = 14pt,
+				ymajorgrids = true,
+				ylabel = {Runtime in [s]},
+				symbolic x coords = {1 Thread, 2 Threads, 4 Threads},
+				xtick = data,
+				scaled y ticks = false,
+				enlarge x limits = 0.25,
+				ymin = 0,
+				nodes near coords,
+				node near coord style={black}
+				%				legend cell align=left,
+				%				legend style={
+					%					at={(1,1.05)},
+					%					anchor=south east,
+					%					column sep=1ex
+					%				}
+				]
+				\addplot [style={red, fill=red, mark=none}]
+				coordinates{ (1 Thread, 1.27) (2 Threads, 1.35) (4 Threads, 1.01)};
+			\end{axis}
+		\end{tikzpicture}
+		\caption{\label{fig::OpenMPB} OpenMP task B}
+	\end{subfigure}
+	\caption{\label{fig::OpenMP1} Timings for solver with different OpenMP optimizations using the coarse mesh}
+\end{figure}
+
+As the critical regions of approach A) are to be executed by only one thread at a time, the runtime will increase with an increasing number of threads, as observed in \refFig{fig::OpenMPA}. A large overhead is created due to the management of lock, to ensure that only one thread at a time is running through a critical region. This overhead increases with a higher number of threads. While one thread is executing a critical region the other threads have to wait for this specific thread to finish this section. Only if this thread has completely finished to computations inside a critical region the next thread is allowed to execute this region for its assigned loop indices. To prevent the overhead of multiple locks and to allow threads to work in parallel the reduction keyword for openMP is used. The reduction operation for the computation of the RHS at element level for each element node, allows each thread to first compute local sums of the each MTnew entry in parallel and then performs a serial summation of all local sums to obtain the value of an MTnew entry. But this serial summation is only computed once, compared to the critical region. The same procedure applies also for the computation of the partial L2 error. 
+
+\subsubsection{R2 b)}
+
+To further optimize the parallelization with OpenMP, different scheduling options and chunk sizes are investigated for approach B) (\refCode{Code:OpenMP}). Therefore simulations on the fine mesh with a constant number of 4 threads were conducted. Some unexplained behavior was observed, when using scheduling options other than static for the second loop in which the partial L2 error are computed, where the L2 error gets initialized again with 0, which leads to an untimely convergence of the simulation. Therefore different scheduling options and chunk sizes were first only applied for the first loop (line 15 \refCode{Code:OpenMP}) for the computation of the RHS on element level. For the second loop (line 45 \refCode{Code:OpenMP}) a static scheduling with default chunk size was used. The results are presented in \refFig{fig::Scheduling}. 
+In general the static scheduling performs best with a shortest runtime of 184.06 seconds for a chunk size of 256. In general larger runtimes are observed for the dynamic and guided scheduling options. For dynamic scheduling a larger chunk size of 512 iterations leads to shorter runtimes, where as for static and guided scheduling the medium chunk size of 256 iterations performs best. The runtime of the auto scheduling is at 220.97 seconds, which is marked in grey in \refFig{fig::Scheduling}.
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			ybar,
+			width = 0.85 * \textwidth,
+			height = 8cm,
+			major x tick style = transparent,
+			bar width = 14pt,
+			ymajorgrids = true,
+			ylabel = {Runtime in [s]},
+			symbolic x coords = {static, dynamic, guided, auto},
+			xtick = data,
+			scaled y ticks = false,
+			enlarge x limits = 0.25,
+			ymin = 0,
+			nodes near coords,
+			node near coord style={black, anchor=east, rotate=90},
+			legend cell align=left,
+			legend style={
+				at={(1,1.05)},
+				anchor=south east,
+				column sep=1ex
+			}
+			]
+			\addplot 
+			coordinates{ (static, 184.81) (dynamic, 241.53) (guided, 222.85)};
+			
+			\addplot
+			coordinates{ (static, 184.06) (dynamic, 237.72) (guided, 226.06)};
+			
+			\addplot
+			coordinates{ (static, 188.59) (dynamic, 232.95) (guided, 216.26)};
+			
+			\addplot
+			coordinates{(auto, 220.97)};
+			
+			\legend{static, dynamic, guided, auto}
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\label{fig::Scheduling} Comparison of different scheduling options (static, dynamic, guided, auto) for different chunk sizes(128, 256, 512) in first parallelized loop for 4 threads using the finest mesh}
+\end{figure}
+
+In addition to the introductory investigations regarding the different scheduling options, static scheduling was inspected further. Therefore, the reduction operations for the parallelization of the first and second loop are both equipped with static scheduling and the effects of different chunk sizes are compared in \refFig{fig::OpenMPStatic}. The runtime is decreasing with an increasing chunk size. The shortest runtime is observed for the default option in scheduling with 177.21 seconds on average, which divides the number of loop iterations by the number of threads. This results in a chunk size of 21164 iterations for the first loop and in a chunk size of 21322.5 iterations on average for the second loop for the fine mesh with 85290 nodes and 84656 elements. Thus, the static scheduling with the default chunk size is used for the calculation of speed-up and efficiency for the different meshes in the following section.
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			ybar,
+			width = 0.85 * \textwidth,
+			height = 8cm,
+			major x tick style = transparent,
+			bar width = 14pt,
+			ymajorgrids = true,
+			ylabel = {Runtime in [s]},
+			xlabel = {chunk sizes},
+			symbolic x coords = {128,256,512,default},
+			xtick = data,
+			scaled y ticks = false,
+			enlarge x limits = 0.25,
+			ymin = 0,
+			nodes near coords,
+			node near coord style={black}
+			]
+			\addplot
+			coordinates{ (128, 190.84) (256, 184.83) (512, 184.48) (default, 177.21)};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\label{fig::OpenMPStatic} Runtimes for parallelization of loop in line 15 and loop in line 45 in \refCode{Code:OpenMP} with static scheduling and the same option for chunk size }
+\end{figure}
+
+\subsubsection{R2 c)}
+
+To evaluate the performance gain by using multiple threads for the parallelization approach B) with static scheduling and default chunk size, the runtime, the speed-up (\refEq{eq:SpeedUp}) and the Efficiency (\refEq{eq:Efficiency}) are computed for 1, 2,4, 6, 8 and 12 threads and plotted in  \refFig{fig::Runtime} and \refFig{fig::EffSPOpenMP}. The Speed-up is defined as 
+%
+\begin{equation} \label{eq:SpeedUp}
+	S_p = \frac{T_1}{T_p} \ ,
+\end{equation}
+%
+where $T_1$ denotes the serial runtime of the respective code and $T_p$ the time of parallelized code with $p$ number of threads (cores when considering MPI). The Efficiency is defined as the quotient of speed-up and number of processors 
+%
+\begin{equation}\label{eq:Efficiency}
+	E_p = \frac{S_p}{p} \ .
+\end{equation}
+%
+Ideal efficiency would correspond to $E_p=1$, which means a direct proportional dependency of Speed-up and number of processors. This means x number of processors would result in an x times faster code in comparison to the serial code. Ideal Efficiency and Speed-up can not be achieved in a real situation. First, there are always parts of the code that just can be executed serially or have to be executed by each thread. Second, there will always be some overhead or idle time, if threads are waiting for other threads to complete their tasks at the end of parallel regions. If time is the most important feature, speed-up has to be considered. If the core-hours are to be minimized and used most efficiently, the efficiency should be the measure of choice.
+
+In \refFig{fig::Runtime} the different runtimes for the different simulations on three different meshes (coarse, medium, fine) are visualized.
+For the coarse mesh the shortest runtime was found for 8 threads with 1.13 seconds (\refFig{fig::Rcoarse}). In comparison to the medium (\refFig{fig::Rmedium}) and fine grids (\refFig{fig::Rfine}), which show good scaling behavior,with a monotonous decreasing runtime for an increasing number of threads, the maximum runtime for the coarse mesh was found for 2 threads with 1.5 seconds. This behavior can contributed to the short runtime of the simulations on the coarse mesh itself, as they are in the order of possible fluctuations. Also the number of loop iterations is for the coarse grid not high enough, that parallelization would pay off. For the medium mesh the shortest runtime is 22.76 seconds and 107.75 seconds for the fine mesh, both obtained with 12 threads.
+%
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.7\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/OpenMP/Runtime_coarse.pgf}}
+		\caption{\label{fig::Rcoarse} coarse mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.7\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/OpenMP/Runtime_medium.pgf}}
+		\caption{\label{fig::Rmedium} medium mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.7\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/OpenMP/Runtime_fine.pgf}}
+		\caption{\label{fig::Rfine} fine mesh}
+	\end{subfigure}
+	\caption{\label{fig::Runtime} Runtime for coarse, medium and fine mesh for different number of threads}
+\end{figure}
+
+\clearpage \noindent
+Overall the highest speed-up is observed for 12 threads the fine mesh with a 6.15 times faster execution than the serial runtime. This corresponds to an efficiency of 0.51 . The fine mesh shows the highest speed-up and efficiencies for the different number of threads. This is due to the amount of computations. The coarse mesh has not enough elements and nodes to achieve great performance gain through parallelization as the overhead gets fast to large for a higher number of threads. This results in 8 threads being fastest for the coarse mesh, where as 10 threads for the medium mesh and 12 threads for the fine mesh result in the fastest execution time (\refFig{fig::EffSPOpenMP}).
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/OpenMP/SpeedUp.pgf}}
+		\caption{\label{fig::SPOpenMP} Speed-up}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/OpenMP/Efficiency.pgf}}
+		\caption{\label{fig::EffOpenMP} Efficiency}
+	\end{subfigure}
+	\caption{\label{fig::EffSPOpenMP} Speed-up and efficiencies for coarse, medium and fine mesh for different numbers of threads}
+\end{figure}
+
+\subsubsection{R2 d)}
+This short subsection is dedicated to the default values of the chunk sizes for different scheduling methods. The default scheduling for OpenMP usage on an intel compiler is static. The default chunk size of static is determined by the quotient of the number of loop iterations and the number of threads. For dynamic scheduling the default chunk size is 1. Lastly, the dehault chunk size for guided scheduling is proportional to the number of unassigned iterations divided by the number of the threads. This means the chunk size dynamically decreases for guided scheduling. The scheduling option auto delegated the decision to the scheduling type to the compiler or runtime of the system \cite{spehOpenMPScheduling2016}.
+
+\clearpage
+\subsection{Parallel MPI Solver}
+
+In this section the mpi parallelization of the FEM Solver (reference) is examined regarding it's parallel performance. 
+
+\subsubsection{R3 a)}
+
+\refFig{fig::RuntimeMPI} presents the different runtimes for three different meshes that have different level of refinement. The FEM code was run for 1,2,4,6,8,12 and 16 cores, using the compiler flags for best serial performance (\refSec{sec:Serial}). 
+
+For the coarse mesh the shortest average runtime is at 1.52 seconds with 2 cores (\refFig{fig::RcoarseMPI}), for the medium mesh at 64.69 seconds also with 2 cores (\refFig{fig::RmediumMPI}) and for the fine mesh at 342.57 seconds, which is achieved with 4 cores (\refFig{fig::RfineMPI}). 
+
+In \refFig{fig::MPI}, speed-up and efficiency are illustrated for the different meshes. As already observed in the runtime plots, the best speed-up for the coarse and medium mesh is obtained with 2 cores with a speed-up of 1.26 and 1.22, respectively. For the fine mesh the parallelized code ran fastest with 4 cores, resulting in a speed-up of 2.32. The efficiency graphs show an expected development as the efficiency monotonically decreases with an increasing number of threads. For the MPI parallelization with 2 cores on the fine mesh a noticeable high efficiency with 100\% was measured, being at optimum efficiency, marked in orange in (\refFig{fig::EfffineMPI}). This means that 2 cores do not introduce nearly any communication overhead and a perfect scaling behavior can be achieved. 
+For the highest number of cores all meshes show a very poor efficiency between only 1-8\%. This is also due to the used partitioning approach, which is discussed in (\refSec{sec:partitioning}).
+Again the same principle applies for distributed memory parallelization. If time is the priority, then according to the speed-up plots, 2 cores should be choosen for the coarse and medium mesh and 4 cores for the fine mesh. If, on the other hand the core-hours are limited and the simulations are supposed to be as efficient as possible, a serial code execution would be most efficient for coarse and the medium mesh. For the fine mesh two cores would be optimal regarding efficiency as they showed excellent scaling behavior.
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.7\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/MPI/Runtime_coarse.pgf}}
+		\caption{\label{fig::RcoarseMPI} coarse mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.7\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/MPI/Runtime_medium.pgf}}
+		\caption{\label{fig::RmediumMPI} medium mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.7\textwidth}
+		\centering
+		\resizebox{0.6\width}{!}{\input{plots/MPI/Runtime_fine.pgf}}
+		\caption{\label{fig::RfineMPI} fine mesh}
+	\end{subfigure}
+	\caption{\label{fig::RuntimeMPI} Runtime for coarse, medium and fine mesh for different number of cores}
+\end{figure}
+\clearpage
+
+
+
+\begin{figure}[h!]
+	\centering
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/MPI/SpeedUp_coarse.pgf}}
+		\caption{\label{fig::SPcoarseMPI} Speed-up coarse mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/MPI/Efficiency_coarse.pgf}}
+		\caption{\label{fig::EffcoarseMPI} Efficiency coarse mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/MPI/SpeedUp_medium.pgf}}
+		\caption{\label{fig::SPmediumMPI} Speed-up medium mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/MPI/Efficiency_medium.pgf}}
+		\caption{\label{fig::EffmediumMPI} Efficiency medium mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/MPI/SpeedUp_fine.pgf}}
+		\caption{\label{fig::SPfineMPI} Speed-up fine mesh}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\resizebox{0.5\width}{!}{\input{plots/MPI/Efficiency_fine.pgf}}
+		\caption{\label{fig::EfffineMPI} Efficiency fine mesh}
+	\end{subfigure}
+	\caption{\label{fig::MPI} Speed-up and efficiency for coarse, medium and fine mesh for different number of cores}
+\end{figure}
+\clearpage
+
+\subsubsection{R3 b) \label{sec:partitioning}}
+
+The partitioning of the elements and nodes of the mesh among the individual cores is performed in a round-robin fashion, depending on how the mesh data structure is stored in the mesh input file. Each processors reads with a certain offset a specific amount of elements and nodes from this input file, that is distributed as evenly as possible between the different cores. This results in a more irregular distribution as it can be seen from \refFig{fig::partition}. This partitioning is far from optimal as it is in general recommended to use a partitioning with minimum boundary surfaces between different partitions. This will reduce the necessary communications between neighboring partitions. For a circular domain like this heat diffusion problem on a flat circular plate, a distributions of p similar circle sectors is advisable, where p represents the number of processors used. This partitioning will result in a minimization of the boundary surfaces.
+
+\begin{figure}[h!]
+	\centering
+	\resizebox{0.25\width}{!}{\includegraphics{plots/MPI/partitioning/partitioning.png}}
+	\caption{\label{fig::partition} Partitioning of medium mesh using 8 cores}
+\end{figure}
+
+\subsubsection{R3 c)}
+
+The overall performance of the code can be improved. Some speed-up is achieved, with the shortest runtime for two cores for the coarse and medium mesh and for four cores for the fine mesh. However the efficiency is poor, especially for a higher number of cores (\refFig{fig::MPI}). The current bottleneck is the communication overhead. A lot of loops (line numbers) run over all processors, which results in an increasing loop size for an increasing number of processors. Inside these loops a lot of MPI calls take place, which will result in high communication overhead. Therefore some kind of static data structure, which stores information for all nodes could help. Also a window-halo approach would be beneficial, which allows certain processors to store some data of directly neighboring elements and nodes, that are required for an efficient communication.
+
+Another way to improve the performance of the code is to couple shared memory parallelization on a loop level with OpenMP with the distributed memory parallelization with MPI on global mesh level. Meaning the loops, especially for computing the RHS on element level and for the computation of the L2 error can be parallelized with the proposed approach B) (\refCode{Code:OpenMP}) on each processor. So each processor executes or at least creates multiple threads. This approach is then called hybrid parallelization.
+
+\subsubsection{R3 d)}
+
+This section answers some general question regarding MPI commands and communication methods:\\
+
+1) Why do we use \textit{MPI\_Accumulate} in the code instead of \textit{MPI\_Put}?\\
+
+With the \textit{MPI\_Accumulate} function a reduction among all the processors of a certain variable or array elements can be performed. Like a summation or finding the maximum value throughout all processors. Put simply overwrites a value.\\
+
+2) What are the advantages of using one-sided MPU communication over two-sided MPI communication?\\
+
+On one hand, one-sided communication has no risk of deadlocks as the individual processors do not have to wait for send and receives of other processors in a communicator. Also the communication patterns are in general easier to implement for one-sided communication. On the other hand, the processors simply can read and write to another processor's memory. This however, is error prone and requires a thought-through communication. 
+Two-sided communication is more time-consuming or cumbersome to implement. But, through the send and receive approach, data encapsulation is ensured and the programmer is always aware of which data is exchanged between individual processors. But blocking methods that are required for two-sided communication can lead to an increase in waiting time.\\
+
+3)What advantage does MPI offer over OpenMP, what is a main obstacle of MPI?\\
+
+The difference in the MPI and the OpenMP parallelization approaches lies in the memory architecture. MPI is designed for a distributed memory approach, which does not make any limitations to the number of processors to be used. In contrast, OpenMP follows the shared memory approach, so this make the physical memory of a CPU the limitation for the number of threads. But the parallelisation with OpenMP is less elaborate as it can be easily added to existing code, when considering loop parallelization. MPI introduces a lot of additional overhead, when writing parallel code, due to specific MPI commands and the partitioning.
+

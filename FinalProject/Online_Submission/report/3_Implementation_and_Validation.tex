@@ -1,0 +1,290 @@
+\section{Implementation and Validation}
+
+\subsection{Convergence Criterion}
+The unsteady solution of the heat equation converges to a stead-state for $t\rightarrow \infty$. In order to break out of the time loop a convergence criterion has to be defined, which states the change of the temperature between two subsequent timesteps:
+\begin{equation}
+	\epsilon_{RMS} = \sqrt{\frac{1}{nn} \sum_{i=1}^{nn} \Big( T_i^{n+1} - T_i^n \Big)^2} \leq 10^{-7}
+\end{equation}
+with the root-mean-square error $\epsilon_{RMS}$ and the number of nodes $nn \in \eta \backslash \eta_D$. If $\epsilon_{RMS}$ is lower than a predefined error ($10^{-7}$), the simulation is declared as converged and is finished.
+
+\subsection{Serial Code}
+
+The calculation of the element matrices is performed as presented in \refEq{eq:M} to \refEq{eq:F}. The corresponding code is illustrated in \refCode{Code:Serial1}. The values of the shape functions and their derivatives, as well as the determinate of the jacobian is precomputed for each element node. The matrices M, K and F are computed at element level. After performing the mass lumping procedure the element level matrices must be hard copied to the corresponding triangular element.
+Then the Dirichlet boundary condition \refEq{eq:Dirichlet} is applied at the domain boundary nodes. The global mass for each node is accumulated. 
+
+\begin{lstlisting}[caption={\label{Code:Serial1} Calculation of Element Matrices}]
+// First, fill M, K, F matrices with zero for the current element
+(...)
+
+// Now, calculate the M, K, F matrices
+for(int p=0; p<nGQP; p++)
+{   
+	(...)
+	for(int i=0; i<nen; i++)
+	{
+		for(int j=0; j<nen; j++)
+		{
+			// Consistent mass matrix
+			M[i][j] = M[i][j] +
+			mesh->getME(p)->getS(i) * mesh->getME(p)->getS(j) *
+			mesh->getElem(e)->getDetJ(p) * mesh->getME(p)->getWeight();
+			// Stiffness matrix
+			K[i][j] = K[i][j] +
+			D * mesh->getElem(e)->getDetJ(p) * mesh->getME(p)->getWeight() *
+			(mesh->getElem(e)->getDSdX(p,i) * mesh->getElem(e)->getDSdX(p,j) +
+			mesh->getElem(e)->getDSdY(p,i) * mesh->getElem(e)->getDSdY(p,j));
+		}
+		// Forcing matrix
+		F[i] = F[i] + factor_F * mesh->getME(p)->getS(i);
+		
+	}
+}
+
+//Calculation of total mass and the total diagonal mass and perform mass lumping
+(...)
+
+//Total mass at each node is accumulated on local node structure:
+for(int i=0; i<nen; i++)
+{
+	node = mesh->getElem(e)->getConn(i);
+	mesh->getNode(node)->addMass(M[i][i]);
+}
+
+// At this point we have the necessary K, M, F matrices as a member of femSolver 
+// object.
+// They must be hard copied to the corresponding triElement variables.
+for(int i=0; i<nen; i++)
+{
+	node = mesh->getElem(e)->getConn(i);
+	mesh->getElem(e)->setF(i, F[i]);
+	mesh->getElem(e)->setM(i, M[i][i]);
+	for(int j=0; j<nen; j++)
+	{
+		mesh->getElem(e)->setK(i,j,K[i][j]);
+	}
+}
+\end{lstlisting}
+
+After the previous computations the explicit solver is entered. The outer loop is an iteration loop in which the convergence criterion is checked at the end (\refCode{Code:Serial2}). If convergence is reached, the code breaks out of the loop. After clearing all entries of the RHS storage MTnew, the second inner loop iterates over all elements, evaluating the RHS at element level (line 9 to 22 in \refCode{Code:Serial2}). This is followed by the computation of the new temperature, using the inverted mass matrix, which inverse corresponds to it's reciprocal as the mass lumping algorithm was previously applied to diagonalize the mass matrix. Subsequently, the global RMS error can be computed and the convergence criterion is checked.
+
+\begin{lstlisting}[caption={\label{Code:Serial2} Explicit Solver}]
+	for (int iter=0; iter<nIter; iter++)
+	{
+		// clear RHS MTnew
+		(...)
+		// Evaluate right hand side at element level
+		for(int e=0; e<ne; e++)
+		{
+			(...)
+			for(int i=0; i<nen; i++)
+			{
+				TL[i] = T[elem->getConn(i)];
+			}
+			
+			MTnewL[0] = M[0]*TL[0] + dT*(F[0]-(K[0]*TL[0]+K[1]*TL[1]+K[2]*TL[2]));
+			MTnewL[1] = M[1]*TL[1] + dT*(F[1]-(K[3]*TL[0]+K[4]*TL[1]+K[5]*TL[2]));
+			MTnewL[2] = M[2]*TL[2] + dT*(F[2]-(K[6]*TL[0]+K[7]*TL[1]+K[8]*TL[2]));
+			
+			// RHS is accumulated at local nodes
+			MTnew[elem->getConn(0)] += MTnewL[0];
+			MTnew[elem->getConn(1)] += MTnewL[1];
+			MTnew[elem->getConn(2)] += MTnewL[2];
+		}
+		
+		// Evaluate the new temperature on each node on partition level
+		partialL2error = 0.0;
+		globalL2error = 0.0;
+		for(int i=0; i<nn; i++)
+		{
+			pNode = mesh->getNode(i);
+			if(pNode->getBCtype() != 1)
+			{
+				massTmp = massG[i];
+				MT = MTnew[i];
+				Tnew = MT/massTmp;
+				partialL2error += pow(T[i]-Tnew,2);
+				T[i] = Tnew;
+				MTnew[i] = 0;
+			}
+		}
+		globalL2error = sqrt(partialL2error/this->nnSolved);
+		globalL2error = globalL2error / initialL2error;
+\end{lstlisting}
+
+\subsection{Parallelization with OpenMP}
+
+A critical region is to be executed by only one thread at a time. This is important to prevent data races. A data race means that multiple threads try to access and manipulate the same variable / memory address at the same time. This might lead to unpredictable behavior, which can result in incorrect computations. 
+
+\begin{lstlisting}[caption={\label{Code:OpenMP} Parallelization of two most time consuming loops with implementation A and B}]
+	for (int iter=0; iter<nIter; iter++)
+	{
+		// clear RHS MTnew
+		A) #pragma omp parallel for
+		for(i=0; i<nn; i++){
+			MTnew[i] = 0;
+		}
+		A) #pragma omp parallel firstprivate(MTnew)
+		B) #pragma omp parallel
+		{
+			// Evaluate right hand side at element level
+			A) #pragma omp for private(elem, M, F, K, TL, i, MTnewL)
+			B) #pragma omp for private(elem, M, F, K, TL, i, MTnewL) 
+			B) reduction(+: MTnew[0:nn]) schedule(dynamic,512)
+			for(int e=0; e<ne; e++)
+			{
+				elem = mesh->getElem(e);
+				M = elem->getMptr();
+				F = elem->getFptr();
+				K = elem->getKptr();
+				for(i=0; i<nen; i++)
+				{
+					TL[i] = T[elem->getConn(i)];
+				}
+				
+				MTnewL[0] = M[0]*TL[0] + dT*(F[0]-(K[0]*TL[0]+...));
+				MTnewL[1] = M[1]*TL[1] + dT*(F[1]-(K[3]*TL[0]+...));
+				MTnewL[2] = M[2]*TL[2] + dT*(F[2]-(K[6]*TL[0]+...));
+				
+				
+				// RHS is accumulated at local nodes
+				A) #pragma omp critical
+				MTnew[elem->getConn(0)] += MTnewL[0];
+				A) #pragma omp critical
+				MTnew[elem->getConn(1)] += MTnewL[1];
+				A) #pragma omp critical
+				MTnew[elem->getConn(2)] += MTnewL[2];
+			}
+			// Evaluate the new temperature on each node on partition level
+			partialL2error = 0.0;
+			globalL2error = 0.0;
+			A) #pragma omp for private(pNode, massTmp, MT, Tnew)
+			B) #pragma omp for private(pNode, massTmp, MT, Tnew) 
+			B) reduction(+:partialL2error) schedule(dynamic,512)
+			for(int i=0; i<nn; i++)
+			{
+				pNode = mesh->getNode(i);
+				if(pNode->getBCtype() != 1)
+				{
+					massTmp = massG[i];
+					MT = MTnew[i];
+					Tnew = MT/massTmp;
+					A) #pragma omp critical
+					partialL2error += pow(T[i]-Tnew,2);
+					T[i] = Tnew;
+				}
+			}
+		}
+		
+		globalL2error = sqrt(partialL2error/nn);
+\end{lstlisting}
+
+\subsection{Parallelization with MPI}
+
+\begin{lstlisting}[caption={\label{Code:MPI1} Determination of number elements on current rank and number nodes in current}]
+	// Determine nec, mec
+	nec = (ne-1)/npes + 1;
+	mec = nec;
+	if ((mype+1)*mec > ne)
+	nec = ne - mype*mec;
+	if (nec < 0)
+	nec = 0;
+	
+	// Determine nnc, mnc
+	nnc = (nn-1)/npes + 1;
+	mnc = nnc;
+	if ((mype+1)*mnc > nn)
+	nnc = nn - mype*mnc;
+	if (nnc < 0)
+	nnc = 0;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={\label{Code:MPI2} Read file for every rank with specific offset}]
+	(...)
+	offset = mype*nsd*mnc*sizeof(double);
+	MPI_Type_contiguous(nnc*nsd, MPI_DOUBLE, &mxyzftype);
+	MPI_Type_commit(&mxyzftype);
+	MPI_File_open(MPI_COMM_WORLD, writable, MPI_MODE_RDONLY, MPI_INFO_NULL, &fileptr);
+	MPI_File_set_view(fileptr, offset, MPI_DOUBLE, mxyzftype, "native", MPI_INFO_NULL);
+	readStream = new char [nsd*nnc*sizeof(double)];
+	MPI_File_read(fileptr,readStream, nsd*nnc, MPI_DOUBLE, &status);
+	swapBytes(readStream, nsd*nnc, sizeof(double));
+	for(int i=0; i<nnc; i++)
+	{
+		node[i].setX(*((double*)readStream + nsd*i));
+		node[i].setY(*((double*)readStream + nsd*i+1));
+		xyz[i*nsd+xsd] = *((double*)readStream + nsd*i);
+		xyz[i*nsd+ysd] = *((double*)readStream + nsd*i+1);
+	}
+	if (mype==0) cout << "> File read complete: " << dummy << endl;
+	
+	MPI_File_close(&fileptr);
+	MPI_Barrier(MPI_COMM_WORLD);
+	
+\end{lstlisting}
+
+- explain mapping from local to global node list
+- calculate element matrices is performed on every core
+
+\begin{lstlisting}[caption={\label{Code:MPI3} Explicit solver for MPI parallelization}]
+	MPI_Win winMTnew;
+	MPI_Win winTG;
+	
+	MPI_Win_create(MTnewG, nnc*sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winMTnew);
+	MPI_Win_create(TG, nnc*sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winTG);
+	MPI_Win_fence(0, winMTnew);
+	MPI_Win_fence(0, winTG);
+	
+	localizeTemperature(winTG);
+	
+	for (int iter=0; iter<nIter; iter++)
+	{
+		
+		// Similar to serial Code, RHS is evaluated at element level
+		// and accumulated at local nodes
+		(...)
+		 
+		// local node level MTnew is transferred to partition node level (MTnewL to MTnewG)
+		accumulateMTnew(winMTnew);
+		
+		// Evaluate the new temperature on each node on partition level
+		for(int i=0; i<nnc; i++)
+		{
+			pNode = mesh->getNode(i);
+			(...)
+		}
+		
+		// Transfer new temperatures from partition to local node level (from TG to TL)
+		localizeTemperature(winTG);
+		
+		MPI_Allreduce(&partialL2error, &globalL2error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		
+		globalL2error = sqrt(globalL2error/(double)this->nnSolved);
+		
+		// Output of iterations and globalL2error on parent processor
+	
+	MPI_Win_free(&winMTnew);
+	MPI_Win_free(&winTG);
+	
+	partialsumT = 0.0;
+	for (int i = 0; i < nnc; i++)
+	{
+		partialsumT += TG[i];
+	}
+	MPI_Allreduce(&partialsumT, &sumT, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+\end{lstlisting}
+
+-accumulate mass
+-localize temperature
+-accumulate MTNew
+
+\subsection{R1 a) Validation}
+For the validation of the FEM solver, the solution of the coarse mesh is compared to the analytical solution in \refFig{fig::TemperatureDist}. The numeric solution is in good agreement with the analytical solution. Slight deviations are observed at the disk's center where the temperature distribution has it's global maximum. Accounting for large changes in the temperature gradient at the center of the disk. 
+
+\begin{figure}[!htbp]
+	\centering
+	%\hspace*{0.8cm}
+	\leavevmode
+	\resizebox{0.8\width}{!}{\input{plots/serial/TemperatureDist.pgf}}
+	\caption{Comparison of the steady-state temperature distribution of the analytical solution (refEQ) and the numerical solution on the coarse mesh}
+	\label{fig::TemperatureDist}
+\end{figure}
