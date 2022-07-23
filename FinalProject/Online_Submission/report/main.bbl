@@ -1,5 +1,10 @@
 \begin{thebibliography}{1}
 
+\bibitem{doneaFiniteElementMethods2003}
+J.~Don{\'e}a and Antonio Huerta.
+\newblock {\em Finite Element Methods for Flow Problems}.
+\newblock {Wiley}, {Chichester ; Hoboken, NJ}, 2003.
+
 \bibitem{anmeyRWTHHPCClusterUser}
 Dieter {an Mey}, Christian Terboven, Paul Kapinos, Dirk Schmidl, Sandra Wienke,
   and Tim Cramer.
