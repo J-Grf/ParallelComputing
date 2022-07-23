@@ -17,6 +17,7 @@ where $T$ is the temperature, $\kappa$ the thermal diffusivity, and $f$ the ther
 \end{equation}
 where $Q=P \cdot d_z$ is the volumetric heat source and $d_z = 0.1m $ the out-of-plane thickness. For validation purposes an analytical solution for $t \rightarrow \infty$ is given by:
 \begin{equation}
+	\label{eq:analytical}
 	T(r) = \left\{\begin{array}{ll} T_0-\frac{Q}{2 \pi \alpha } \big(\frac{1}{2} \big(\frac{r^2}{R_1^2} - 1\big)\big)+ln\big(\frac{R_1}{R_2}\big) & \text{if} \ r < R_1, \\
 		T_0 - \frac{Q}{2 \pi \alpha } ln\big(\frac{r}{R_2}\big)& \text{if} \ r \geq R_1 \end{array}\right . .
 \end{equation}
