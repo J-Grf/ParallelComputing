@@ -192,6 +192,10 @@ In this context different scheduling options, with different chunk sizes can be 
 
 \subsection{Parallelization with MPI}
 
+The other parallelization approach that is investigated for the presented FEM solver is a distributed memory approach. Therefore, the message passing interface communication (MPI) is used, with one-sided communication. This communication pattern assumes a machine with direct memory access hardware, like for most shared memory computers and a few distributed memory machines. The participating processors (PEs) inside a MPI communicator need to know the memory layout of each other. This has the benefit, that more complex procedures like send and receive operations, as in two-sided communication, can be circumvented. But this also means that this method is more error prone as the processors have access to each others memory. 
+
+For an adequate distribution of the data and the computation, first the partitioning has to be determined. It should be aimed for an even distribution, as the load is balanced among all PEs that way. The number of elements on the current PE, the possible maximum number of elements, the number of nodes on the current PE and the maximum number of nodes are computed as presented in \refCode{Code:MPI1}.
+
 \begin{lstlisting}[caption={\label{Code:MPI1} Determination of number elements on current rank and number nodes in current}]
 	// Determine nec, mec
 	nec = (ne-1)/npes + 1;
@@ -209,6 +213,8 @@ In this context different scheduling options, with different chunk sizes can be 
 	if (nnc < 0)
 	nnc = 0;
 \end{lstlisting}
+
+The coordinate data of all nodes and the connectivity of the nodes to form the elements is read from different grid input files. The code in \refCode{Code:MPI2} shows the data input exemplarily. Each processors reads a nearly equal amount of data with a certain offset from the input file in parallel and stores it to it's local memory. 
 
 \begin{lstlisting}[caption={\label{Code:MPI2} Read file for every rank with specific offset}]
 	(...)
@@ -236,8 +242,11 @@ In this context different scheduling options, with different chunk sizes can be 
 	
 \end{lstlisting}
 
-- explain mapping from local to global node list
-- calculate element matrices is performed on every core
+As every PE contains a certain number of node objects and element object in his memory, the nodes are in general not the nodes that are associated with the elements. Therefore, global data of the associated element nodes has to be distributed to each PE. A certain procedure is applied in order to create a mapping from local nodes to the global nodes, which will not be explained in detail.
+
+The explicit solver is parallelized using MPI as illustrated in \refCode{Code:MPI3}. The basic operations are the same as for the serial solver. Every processors evaluates the RHS MTnewL for it's local elements nodes. After the computation of the local RHS MTnewL for each local element nodes, an MPI accumulation is executed, which adds up all the computed values of MTnewL for a specific global node to obtain MTnew, as multiple elements can share a global node, which is therefore part of multiple PE. This is always the case for the nodes at partition boundaries.
+
+After the new temperatures for each time step are computed on a global level, the temperature has to be distributed back to the local node level in "localizeTemperature" in line 31 in \refCode{Code:MPI3}. The global error can then be determined with a \textit{MPI\_Allreduce}, adding up all partial errors for each partition and distributing the result back to all PEs inside the MPI communicator. 
 
 \begin{lstlisting}[caption={\label{Code:MPI3} Explicit solver for MPI parallelization}]
 	MPI_Win winMTnew;
@@ -259,7 +268,8 @@ In this context different scheduling options, with different chunk sizes can be 
 		// and accumulated at local nodes
 		(...)
 		 
-		// local node level MTnew is transferred to partition node level (MTnewL to MTnewG)
+		// local node level MTnew is transferred to partition node level 
+		// (MTnewL to MTnewG)
 		accumulateMTnew(winMTnew);
 		
 		// Evaluate the new temperature on each node on partition level
@@ -269,7 +279,8 @@ In this context different scheduling options, with different chunk sizes can be 
 			(...)
 		}
 		
-		// Transfer new temperatures from partition to local node level (from TG to TL)
+		// Transfer new temperatures from partition to local node level 
+		// (from TG to TL)
 		localizeTemperature(winTG);
 		
 		MPI_Allreduce(&partialL2error, &globalL2error, 1, MPI_DOUBLE, MPI_SUM, 
@@ -282,17 +293,10 @@ In this context different scheduling options, with different chunk sizes can be 
 	MPI_Win_free(&winMTnew);
 	MPI_Win_free(&winTG);
 	
-	partialsumT = 0.0;
-	for (int i = 0; i < nnc; i++)
-	{
-		partialsumT += TG[i];
-	}
-	MPI_Allreduce(&partialsumT, &sumT, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	(...)
 \end{lstlisting}
 
--accumulate mass
--localize temperature
--accumulate MTNew
+For the partitioning, different ways are possible. Round-robin fashion opposed to a symmetric partitioning is discussed in \refSec{sec:partitioning}
 
 \subsection{R1 a) Validation}
 For the validation of the FEM solver, the solution of the coarse mesh is compared to the analytical solution in \refFig{fig::TemperatureDist}. The numeric solution is in good agreement with the analytical solution. Slight deviations are observed at the disk's center where the temperature distribution has it's global maximum. Accounting for large changes in the temperature gradient at the center of the disk. 
