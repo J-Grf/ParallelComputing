@@ -111,15 +111,27 @@ After the previous computations the explicit solver is entered. The outer loop i
 		globalL2error = globalL2error / initialL2error;
 \end{lstlisting}
 
-\subsection{Parallelization with OpenMP}
+\subsection{Parallelization with OpenMP \label{sec:POpenMP}}
+
+The two most time consuming loops, which are the computation of the RHS and the computation of the global RMS error are to be parallelized on loop level with a shared memory approach. This means multiple threads share the work of the comutation inside a loop, and have access to the same memory address space.
+
+Therefore OpenMP directives are used. Two different approaches are implemented, denoted with "A)" and "B)" which are assessed in \refSec{sec:OpenMPAB}. The corresponding directives are presented in \refCode{Code:OpenMP}.
+
+For approach "A)" MTnew is declared as firstprivate upon entry in the parallel region. This ensures, that the entries MTnew are initialized at the entry of the parallel section, which means MTnew is copied from the parent thread to the child threads. For approach "B)" no initalialization of MTnew is performed on the child threads, as it is a shared array among all threads. Both approaches declare the element object elem, the mass matrix M, the stiffness matrix K, the source vector F, the local temperature, the node loop index i and the local RHS MTnewL as private. This means all these objects are private (local) to the thread and undefined upon entry to the region. For approach A), critical region are used for the accumulation of the RHS at the local nodes and the computation of the partial L2 errors. 
 
 A critical region is to be executed by only one thread at a time. This is important to prevent data races. A data race means that multiple threads try to access and manipulate the same variable / memory address at the same time. This might lead to unpredictable behavior, which can result in incorrect computations. 
+
+For approach B), reduction operations are used. The reduction operation for the computation of the RHS at element level for each element node, allows each thread to first compute local sums of the each MTnew entry in parallel and then performs a serial summation of all local sums to obtain the value of an MTnew entry. But this serial summation is only computed once, compared to the critical region. The same procedure applies also for the computation of the partial L2 error. 
+
+In this context different scheduling options, with different chunk sizes can be compared (\refSec{sec:Scheduling}). Explaining the different scheduling options briefly, static scheduling accounts for a static chunk size, meaning a chunk is consisting of a constant number of iterations. These chunks are then distributed in a round-robin fashion among the threads. "Dynamic" scheduling however allows the chunk size to be allocated dynamically, based on the load of a thread. Guided scheduling works similar to "dynamic" scheduling, but with a chunk size that is constantly decreasing, based on the unassigned iterations left. The scheduling option "auto" leaves this decision to the compiler.
+\newpage
 
 \begin{lstlisting}[caption={\label{Code:OpenMP} Parallelization of two most time consuming loops with implementation A and B}]
 	for (int iter=0; iter<nIter; iter++)
 	{
 		// clear RHS MTnew
 		A) #pragma omp parallel for
+		B) #pragma omp parallel for
 		for(i=0; i<nn; i++){
 			MTnew[i] = 0;
 		}
@@ -203,8 +215,10 @@ A critical region is to be executed by only one thread at a time. This is import
 	offset = mype*nsd*mnc*sizeof(double);
 	MPI_Type_contiguous(nnc*nsd, MPI_DOUBLE, &mxyzftype);
 	MPI_Type_commit(&mxyzftype);
-	MPI_File_open(MPI_COMM_WORLD, writable, MPI_MODE_RDONLY, MPI_INFO_NULL, &fileptr);
-	MPI_File_set_view(fileptr, offset, MPI_DOUBLE, mxyzftype, "native", MPI_INFO_NULL);
+	MPI_File_open(MPI_COMM_WORLD, writable, MPI_MODE_RDONLY, 
+	MPI_INFO_NULL, &fileptr);
+	MPI_File_set_view(fileptr, offset, MPI_DOUBLE, mxyzftype, 
+	"native", MPI_INFO_NULL);
 	readStream = new char [nsd*nnc*sizeof(double)];
 	MPI_File_read(fileptr,readStream, nsd*nnc, MPI_DOUBLE, &status);
 	swapBytes(readStream, nsd*nnc, sizeof(double));
@@ -229,8 +243,10 @@ A critical region is to be executed by only one thread at a time. This is import
 	MPI_Win winMTnew;
 	MPI_Win winTG;
 	
-	MPI_Win_create(MTnewG, nnc*sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winMTnew);
-	MPI_Win_create(TG, nnc*sizeof(double), sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winTG);
+	MPI_Win_create(MTnewG, nnc*sizeof(double), sizeof(double), MPI_INFO_NULL, 
+	MPI_COMM_WORLD, &winMTnew);
+	MPI_Win_create(TG, nnc*sizeof(double), sizeof(double), MPI_INFO_NULL, 
+	MPI_COMM_WORLD, &winTG);
 	MPI_Win_fence(0, winMTnew);
 	MPI_Win_fence(0, winTG);
 	
@@ -256,7 +272,8 @@ A critical region is to be executed by only one thread at a time. This is import
 		// Transfer new temperatures from partition to local node level (from TG to TL)
 		localizeTemperature(winTG);
 		
-		MPI_Allreduce(&partialL2error, &globalL2error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		MPI_Allreduce(&partialL2error, &globalL2error, 1, MPI_DOUBLE, MPI_SUM, 
+		MPI_COMM_WORLD);
 		
 		globalL2error = sqrt(globalL2error/(double)this->nnSolved);
 		
