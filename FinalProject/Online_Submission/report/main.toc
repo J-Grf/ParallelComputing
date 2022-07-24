@@ -1,0 +1,29 @@
+\babel@toc {english}{}
+\contentsline {section}{\numberline {1}Introduction}{6}{section.1}%
+\contentsline {section}{\numberline {2}Theory and Methods}{7}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Heat Equation and Problem Domain}{7}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Weak Form}{7}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Finite Element Method}{8}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Meshes}{10}{subsection.2.4}%
+\contentsline {section}{\numberline {3}Implementation and Validation}{11}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Convergence Criterion}{11}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Serial Code}{11}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Parallelization with OpenMP }{13}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Parallelization with MPI}{15}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}R1 a) Validation}{17}{subsection.3.5}%
+\contentsline {section}{\numberline {4}Results and Discussion}{18}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Serial Solver }{18}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}R1 a)}{18}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2}R1 b)}{19}{subsubsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.2}Parallel OpenMP Solver}{21}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}R2 a) }{21}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}R2 b) }{22}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}R2 c)}{23}{subsubsection.4.2.3}%
+\contentsline {subsubsection}{\numberline {4.2.4}R2 d)}{25}{subsubsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.3}Parallel MPI Solver}{26}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}R3 a)}{26}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}R3 b) }{29}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}R3 c)}{29}{subsubsection.4.3.3}%
+\contentsline {subsubsection}{\numberline {4.3.4}R3 d)}{30}{subsubsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.4}Overall Best Performance}{30}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Conclusion}{31}{section.5}%

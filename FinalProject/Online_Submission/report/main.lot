@@ -1,0 +1,4 @@
+\babel@toc {english}{}
+\contentsline {table}{\numberline {1}{\ignorespaces Problem parameters for the heated disk problem\relax }}{8}{table.caption.5}%
+\contentsline {table}{\numberline {2}{\ignorespaces Number of nodes and elements for the three different meshes\relax }}{10}{table.caption.6}%
+\contentsline {table}{\numberline {3}{\ignorespaces Timings of the various compiler flags for serial optimization, the shortest achieved runtime is printed in bold font\relax }}{20}{table.caption.17}%

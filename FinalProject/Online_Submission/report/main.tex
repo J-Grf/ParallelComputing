@@ -62,15 +62,50 @@
 \newcommand{\refCh}[1]{Ch. \ref{#1}}
 \newcommand{\refCode}[1]{Code excerpt \ref{#1}}
 
+\usepackage{hyperref}
+%\hypersetup{
+%	colorlinks,
+%	citecolor=blue,
+%	filecolor=blue,
+%	linkcolor=blue,
+%	urlcolor=black
+%}
+
+\hypersetup{
+	backref,
+	colorlinks=false,
+	linktocpage,
+	pdfborder = {0 0 1 [1 0] }
+}
+
 \begin{document}
 
 \mtitle{Final Project Report}
 
+\vspace{15em}
 \mauthor{Parallel Computing for Computational Mechanics}
 
 \maff{Johannes Grafen 380149}{johannes.grafen@rwth-aachen.de}
 
+\renewcommand\baselinestretch{2.0}
+%\baselineskip=18pt plus1pt
 \include{0_Abstract}
+
+%: ----------------------- contents ------------------------
+
+\tableofcontents            % print the table of contents
+% levels are: 0 - chapter, 1 - section, 2 - subsection, 3 - subsection
+
+
+%: ----------------------- list of figures/tables ------------------------
+
+\newpage
+\listoffigures	% print list of figures
+
+\newpage
+\listoftables  % print list of tables
+
+\renewcommand\baselinestretch{1.0}
 \include{1_Introduction}
 \include{2_Theory_and_Methods}
 \include{3_Implementation_and_Validation}

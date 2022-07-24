@@ -1,15 +1,16 @@
 \section{Implementation and Validation}
 
 \subsection{Convergence Criterion}
-The unsteady solution of the heat equation converges to a stead-state for $t\rightarrow \infty$. In order to break out of the time loop a convergence criterion has to be defined, which states the change of the temperature between two subsequent time steps:
+The unsteady solution of the heat equation converges to a steady-state for $t\rightarrow \infty$. In order to break out of the time loop a convergence criterion has to be defined, which states the change of the temperature between two subsequent time steps:
 \begin{equation}
+	\label{eq:convergence}
 	\epsilon_{RMS} = \sqrt{\frac{1}{nn} \sum_{i=1}^{nn} \Big( T_i^{n+1} - T_i^n \Big)^2} \leq 10^{-7}
 \end{equation}
 with the root-mean-square error $\epsilon_{RMS}$ and the number of nodes $nn \in \eta \backslash \eta_D$. If $\epsilon_{RMS}$ is lower than a predefined error ($10^{-7}$), the simulation is declared as converged and is finished.
 
 \subsection{Serial Code}
 
-The calculation of the element matrices is performed as presented in \refEq{eq:M} to \refEq{eq:F}. The corresponding code is illustrated in \refCode{Code:Serial1}. The values of the shape functions and their derivatives, as well as the determinate of the Jacobian is precomputed for each element node. The matrices M, K and F are computed at element level. After performing the mass lumping procedure the element level matrices must be hard copied to the corresponding triangular element.
+The calculation of the element matrices is performed as presented in \refEq{eq:M} to \refEq{eq:F}. The corresponding code is illustrated in \refCode{Code:Serial1}. The values of the shape functions and their derivatives, as well as the determinate of the Jacobian is precomputed for each element node, before entering the iteration loop. The matrices M, K and F are computed on element level. After performing the mass lumping procedure the element level matrices must be hard-copied to the corresponding triangular element.
 Then the Dirichlet boundary condition \refEq{eq:Dirichlet} is applied at the domain boundary nodes. The global mass for each node is accumulated. 
 
 \begin{lstlisting}[caption={\label{Code:Serial1} Calculation of Element Matrices}]
@@ -65,7 +66,7 @@ for(int i=0; i<nen; i++)
 }
 \end{lstlisting}
 
-After the previous computations the explicit solver is entered. The outer loop is an iteration loop in which the convergence criterion is checked at the end (\refCode{Code:Serial2}). If convergence is reached, the code breaks out of the loop. After clearing all entries of the RHS storage \textit{MTnew}, the second inner loop iterates over all elements, evaluating the RHS at element level (line 9 to 22 in \refCode{Code:Serial2}). This is followed by the computation of the new temperature, using the inverted mass matrix, which inverse corresponds to it's reciprocal as the mass lumping algorithm was previously applied to diagonalize the mass matrix. Subsequently, the global RMS error can be computed and the convergence criterion is checked.
+After the previous computations the explicit solver is entered. The outer loop is an iteration loop in which the convergence criterion \refEq{eq:convergence} is checked at the end (\refCode{Code:Serial2}). If convergence is reached, the code breaks out of the loop. After clearing all entries of the RHS storage \textit{MTnew}, the second inner loop iterates over all elements, evaluating the RHS at element level (line 9 to 22 in \refCode{Code:Serial2}). This is followed by the computation of the new temperature, using the inverted mass matrix, which inverse corresponds to it's reciprocal as the mass lumping algorithm was previously applied to diagonalize the mass matrix. Subsequently, the global RMS error can be computed and the convergence criterion \refEq{eq:convergence} is checked.
 
 \begin{lstlisting}[caption={\label{Code:Serial2} Explicit Solver}]
 	for (int iter=0; iter<nIter; iter++)
@@ -113,17 +114,17 @@ After the previous computations the explicit solver is entered. The outer loop i
 
 \subsection{Parallelization with OpenMP \label{sec:POpenMP}}
 
-The two most time consuming loops, which are the computation of the RHS and the computation of the global RMS error are to be parallelized on loop level with a shared memory approach. This means multiple threads share the work of the comutation inside a loop, and have access to the same memory address space.
+The two most time consuming loops, which are the computation of the RHS and the computation of the global RMS error, are to be parallelized on loop-level with a shared memory approach. This means multiple threads share the work of the operations inside a loop, and have access to the same memory address space.
 
 Therefore OpenMP directives are used. Two different approaches are implemented, denoted with "A)" and "B)" which are assessed in \refSec{sec:OpenMPAB}. The corresponding directives are presented in \refCode{Code:OpenMP}.
 
-For approach "A)" \textit{MTnew} is declared as \textit{firstprivate} upon entry in the parallel region. This ensures, that the entries \textit{MTnew} are initialized at the entry of the parallel section, which means \textit{MTnew} is copied from the parent thread to the child threads. For approach "B)" no initialization of \textit{MTnew} is performed on the child threads, as it is a shared array among all threads. Both approaches declare the element object elem, the mass matrix M, the stiffness matrix K, the source vector F, the local temperature, the node loop index i and the local RHS \textit{MTnew}L as private. This means all these objects are private (local) to the thread and undefined upon entry to the region. For approach A), critical region are used for the accumulation of the RHS at the local nodes and the computation of the partial L2 errors. 
+For approach "A)", \textit{MTnew} is declared as \textit{firstprivate} upon entry in the parallel region. This ensures, that the entries \textit{MTnew} are initialized at the entry of the parallel section, which means \textit{MTnew} is copied from the parent thread to the child threads. For approach "B)", no initialization of \textit{MTnew} is performed on the child threads, as it is a \textit{shared} array among all threads. Both approaches declare the element object \textit{ele}m, the mass matrix \textit{M}, the stiffness matrix \textit{K}, the source vector \textit{F}, the local temperature \textit{TL}, the node loop index \textit{i} and the local RHS \textit{MTnewL} as \textit{private}. This means all these objects are \textit{private} (local) to the thread and undefined upon entry to the region. For approach A), \textit{critical} region are used for the accumulation of the RHS at the local nodes and the computation of the partial L2 errors. 
 
-A critical region is to be executed by only one thread at a time. This is important to prevent data races. A data race means that multiple threads try to access and manipulate the same variable / memory address at the same time. This might lead to unpredictable behavior, which can result in incorrect computations. 
+A \textit{critical} region is executed by only one thread at a time. This is important to prevent data races. A data race means that multiple threads try to access and manipulate the same variable / memory address at the same time. This might lead to unpredictable behavior, which can result in incorrect computations. 
 
-For approach B), reduction operations are used. The reduction operation for the computation of the RHS at element level for each element node, allows each thread to first compute local sums of the each \textit{MTnew} entry in parallel and then performs a serial summation of all local sums to obtain the value of an \textit{MTnew} entry. But this serial summation is only computed once, compared to the critical region. The same procedure applies also for the computation of the partial L2 error. 
+For approach B), \textit{reduction} operations are used. The \textit{reduction} operation for the computation of the RHS at element level for each element node, allows each thread to first compute local sums of the each \textit{MTnew} entry in parallel and then performs a serial summation of all local sums to obtain the value of an \textit{MTnew} entry. But this serial summation is only computed once, compared to the \textit{critical} region. The same procedure applies also for the computation of the \textit{partialL2error}. 
 
-In this context different scheduling options, with different chunk sizes can be compared (\refSec{sec:Scheduling}). Explaining the different scheduling options briefly, static scheduling accounts for a static chunk size, meaning a chunk is consisting of a constant number of iterations. These chunks are then distributed in a round-robin fashion among the threads. "Dynamic" scheduling however allows the chunk size to be allocated dynamically, based on the load of a thread. Guided scheduling works similar to "dynamic" scheduling, but with a chunk size that is constantly decreasing, based on the unassigned iterations left. The scheduling option "auto" leaves this decision to the compiler.
+In this context different scheduling options, with different chunk sizes can be compared (\refSec{sec:Scheduling}). Explaining the different scheduling options briefly, "static" scheduling accounts for a static chunk size, meaning a chunk is consisting of a constant number of iterations. These chunks are then distributed in a round-robin fashion among the threads. "Dynamic" scheduling however allows the chunk size to be allocated dynamically, based on the load of a thread. "Guided" scheduling works similar to dynamic scheduling, but with a chunk size that is constantly decreasing, based on the unassigned iterations left. The scheduling option "auto" leaves this decision to the compiler.
 \newpage
 
 \begin{lstlisting}[caption={\label{Code:OpenMP} Parallelization of two most time consuming loops with implementation A and B}]
@@ -242,11 +243,11 @@ The coordinate data of all nodes and the connectivity of the nodes to form the e
 	
 \end{lstlisting}
 
-As every PE contains a certain number of node objects and element object in his memory, the nodes are in general not the nodes that are associated with the elements. Therefore, global data of the associated element nodes has to be distributed to each PE. A certain procedure is applied in order to create a mapping from local nodes to the global nodes, which will not be explained in detail.
+As every PE contains a certain number of node objects and element objects in its memory, the nodes are in general not the nodes that are associated with the elements. Therefore, global data of the associated element nodes has to be distributed to each PE. A certain procedure is applied in order to create a mapping from local nodes to the global nodes, which will not be explained in detail for the sake of brevity.
 
-The explicit solver is parallelized using MPI as illustrated in \refCode{Code:MPI3}. The basic operations are the same as for the serial solver. Every processors evaluates the RHS \textit{MTnew}L for it's local elements nodes. After the computation of the local RHS \textit{MTnew}L for each local element nodes, an MPI accumulation is executed, which adds up all the computed values of \textit{MTnew}L for a specific global node to obtain \textit{MTnew}, as multiple elements can share a global node, which is therefore part of multiple PE. This is always the case for the nodes at partition boundaries.
+The explicit solver is parallelized using MPI as illustrated in \refCode{Code:MPI3}. The basic operations are the same as for the serial solver. Every processor evaluates the RHS \textit{MTnewL} for it's local elements nodes. After the computation of the local RHS \textit{MTnewL} for each local element nodes, an MPI accumulation is executed, which adds up all the computed values of \textit{MTnewL} for a specific global node to obtain \textit{MTnewL}, as multiple elements can share a global node, which is therefore part of multiple PE. This is always the case for the nodes at partition boundaries.
 
-After the new temperatures for each time step are computed on a global level, the temperature has to be distributed back to the local node level in "localizeTemperature" in line 31 in \refCode{Code:MPI3}. The global error can then be determined with a \textit{MPI\_Allreduce}, adding up all partial errors for each partition and distributing the result back to all PEs inside the MPI communicator. 
+After the new temperatures are computed for each time step on a global level, the temperature has to be distributed back to the local node level in \textit{localizeTemperature} in line 31 in \refCode{Code:MPI3}. The global error can then be determined with a \textit{MPI\_Allreduce}, adding up all partial errors for each partition and distributing the result back to all PEs inside the MPI communicator. 
 
 \begin{lstlisting}[caption={\label{Code:MPI3} Explicit solver for MPI parallelization}]
 	MPI_Win winMTnew;
@@ -296,10 +297,10 @@ After the new temperatures for each time step are computed on a global level, th
 	(...)
 \end{lstlisting}
 
-For the partitioning, different ways are possible. Round-robin fashion opposed to a symmetric partitioning is discussed in \refSec{sec:partitioning}
+For the partitioning, different ways are possible. A partitioning in round-robin fashion is opposed to a symmetric partitioning is discussed in \refSec{sec:partitioning}
 
 \subsection{R1 a) Validation}
-For the validation of the FEM solver, the solution of the coarse mesh is compared to the analytical solution \refEq{eq:analytical} in \refFig{fig::TemperatureDist}. The numeric solution is in good agreement with the analytical solution. Slight deviations are observed at the disk's center where the temperature distribution has it's global maximum. Accounting for large changes in the temperature gradient at the center of the disk. 
+For the validation of the FEM solver, the solution of the coarse mesh is compared to the analytical solution \refEq{eq:analytical} in \refFig{fig::TemperatureDist}. The numeric solution is in good agreement with the analytical solution. Slight deviations are observed at the disk's center where the temperature distribution has it's global maximum. This accounts for large changes in the temperature gradient at the center of the disk, which require a finer mesh in order to be better resolved. 
 
 \begin{figure}[!htbp]
 	\centering

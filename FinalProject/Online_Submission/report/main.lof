@@ -1,0 +1,11 @@
+\babel@toc {english}{}
+\contentsline {figure}{\numberline {1}{\ignorespaces Problem domain\relax }}{7}{figure.caption.4}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Comparison of the steady-state temperature distribution of the analytical solution (Eq. (\ref {eq:analytical})) and the numerical solution on the coarse mesh\relax }}{17}{figure.caption.7}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Timings for solver with different OpenMP optimizations on the coarse mesh\relax }}{21}{figure.caption.18}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Comparison of different scheduling options (static, dynamic, guided, auto) for different chunk sizes(128, 256, 512) in the first parallelized loop for 4 threads on the finest mesh\relax }}{22}{figure.caption.19}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Runtimes for parallelization of loop in line 15 and loop in line 45 in Code excerpt \ref {Code:OpenMP} with static scheduling and different chunk sizes\relax }}{23}{figure.caption.20}%
+\contentsline {figure}{\numberline {6}{\ignorespaces Runtime for coarse, medium and fine mesh for different number of threads\relax }}{24}{figure.caption.21}%
+\contentsline {figure}{\numberline {7}{\ignorespaces Speed-up and efficiencies for coarse, medium and fine mesh for different numbers of threads\relax }}{25}{figure.caption.22}%
+\contentsline {figure}{\numberline {8}{\ignorespaces Runtime for coarse, medium and fine mesh for different number of cores\relax }}{27}{figure.caption.23}%
+\contentsline {figure}{\numberline {9}{\ignorespaces Speed-up and efficiency for coarse, medium and fine mesh for different number of cores\relax }}{28}{figure.caption.24}%
+\contentsline {figure}{\numberline {10}{\ignorespaces Partitioning of medium mesh using 8 cores, the different colors indicate the affiliation to different partitions\relax }}{29}{figure.caption.25}%
