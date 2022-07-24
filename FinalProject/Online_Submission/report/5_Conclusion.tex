@@ -1,6 +1,6 @@
 \section{Conclusion}
 
-In this report, a FEM solver was optimized and parallelized by first applying serial optimizations with different comiler flags and then comparing two different parallelization paradigms. The performance on three different meshes was evaluated and an optimum of the thread count and core count for the different parallelization approaches was determined.
+In this report, a FEM solver was optimized and parallelized by first applying serial optimizations with different compiler flags and then comparing two different parallelization paradigms. The performance on three different meshes was evaluated and an optimum of the thread count and core count for the different parallelization approaches was determined.
 
 For the serial optimization, the compiler flag "-O3 -axSKYLAKE-AVX512" was found to enhance the performance of the FEM solver most, providing the shortest serial runtime. This compiler flag uses the most aggressive level of optimization, of the used Intel® C++ Compiler, combined with an optimized instruction set for the specific hardware, which is an Intel® Platinum 8160, based on Intel's® Skylake architecture, using 512-bit SIMD instructions. 
 

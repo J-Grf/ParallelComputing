@@ -70,7 +70,7 @@ Applying the Green-Gauss divergence theorem on the left hand side of Equation \r
 
 \subsection{Finite Element Method}
 
-The discretized variational formulation of the continous PDE in weak form (\refEq{eq:weak2})  that is used for the finite element method is formulated as: find $T^h \in \mathcal{S}^h$, such that $\forall w^h \in \mathcal{V}^h$
+The discretized variational formulation of the continuous PDE in weak form (\refEq{eq:weak2})  that is used for the finite element method is formulated as: find $T^h \in \mathcal{S}^h$, such that $\forall w^h \in \mathcal{V}^h$
 
 \begin{equation}
 	\sum_{B \in \eta \backslash \eta_D} \Bigg[(N_A,N_B) \pp{T_b}{t} + a(N_A,N_B)T_B \Bigg] = (N_A,f) - \sum_{B \in \eta_D} a(N_A,N_B)T_D(\vect{x}_B), \forall A \in \eta \backslash \eta_D .
@@ -85,7 +85,7 @@ This variational formulation leads to a matrix form of equations:
 \begin{equation}
 	[M] \Big\{ \dot{T} \Big\} + [K] \Big\{ T \Big\} = \Big\{ F \Big\} 
 \end{equation}
-where $M$ refers to the mass matrix, $K$ to the stiffness matrix and $F$ to the source vector. After applying a first order explicit time integration scheme and isolating the LHS by inverting the mass matrix $M$ the explicit equation to obtain the temperature at the nodes for a timestep $n$ can be written as:
+where $M$ refers to the mass matrix, $K$ to the stiffness matrix and $F$ to the source vector. After applying a first order explicit time integration scheme and isolating the LHS by inverting the mass matrix $M$ the explicit equation to obtain the temperature at the nodes for a time step $n$ can be written as:
 \begin{equation}
 	\label{eq:LHS}
 	\{T\}^{n+1} = ([M]^n)^{-1}([M]^n\{T\}^n + \Delta t(\{F\}^n-[K]^n\{T\}^n)
@@ -95,7 +95,7 @@ In a first step the mass matrices are computed on element level and then assembl
 \begin{equation}
 	\int_{\Omega^e} \Phi(\vect{x}) d\vect{x} = \int_{\Omega^{ref}} \Phi(\xi, \eta)) |\vect{J}(\xi, \eta)| d\xi d\eta 
 \end{equation}
-$\Phi$ denotes an arbitrary function in $\mathcal{S}$, $\vect{J}$ the jacobian for the transformation between global coordinates ($x,y$) and the reference coordinates $(\xi, \eta)$, $\Omega^e$ the physical element domain and $\Omega^{ref}$ the reference domain of the element. The integrals are solved numerically by using Gaussian quadrature:
+$\Phi$ denotes an arbitrary function in $\mathcal{S}$, $\vect{J}$ the Jacobian for the transformation between global coordinates ($x,y$) and the reference coordinates $(\xi, \eta)$, $\Omega^e$ the physical element domain and $\Omega^{ref}$ the reference domain of the element. The integrals are solved numerically by using Gaussian quadrature:
 \begin{equation}
 	\int_0^1 \int_{0}^{1-\eta} \Phi(\xi, \eta) d\xi d\eta \approx \sum_{i=1}^{n_{quad}} w_i \Phi(\xi_i, \eta_i)
 \end{equation}
